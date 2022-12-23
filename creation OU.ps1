@@ -19,12 +19,12 @@ function Creation-UO {
     Write-Host "Erreur lors de la création de l'unité d’organisation '$NomUO': $($Error[0])"-ForegroundColor red
   }
 
-  $createChildOUs = Read-Host "Voulez-vous créer des sous unités d’organisations dans  '$NomUO'? (O/N)"
+  $creationSousUO = Read-Host "Voulez-vous créer des sous unités d’organisations dans  '$NomUO'? (O/N)"
 
-  while ($createChildOUs -eq "O") {
-    $childNomUO = Read-Host "Entrez le nom de le sous unité d’organisation à créer:"
-    Creation-UO -NomUO $childNomUO -ParentUO "OU=$NomUO,$ParentUO"
-    $createChildOUs = Read-Host "Voulez-vous créer des sous OU dans OU '$NomUO'? (O/N)"
+  while ($creationSousUO -eq "O") {
+    $sousNomUO = Read-Host "Entrez le nom de le sous unité d’organisation à créer:"
+    Creation-UO -NomUO $sousNomUO -ParentUO "OU=$NomUO,$ParentUO"
+    $creationSousUO = Read-Host "Voulez-vous créer des sous OU dans OU '$NomUO'? (O/N)"
   }
 }
 
