@@ -8,15 +8,15 @@ function Creation-UO {
   )
 
   if (Get-ADOrganizationalUnit -Filter "Name -eq '$NomUO'" -ErrorAction SilentlyContinue) {
-    Write-Output "l'unité d’organisation'$NomUO' existe déjà."
+    Write-Host "l'unité d’organisation'$NomUO' existe déjà."-ForegroundColor red
     return
   }
 
   try {
     New-ADOrganizationalUnit -Name $NomUO -Path $ParentUO
-    Write-Output "l'unité d’organisation'$NomUO' a été créé avec succès."
+    Write-Host "l'unité d’organisation'$NomUO' a été créé avec succès."-ForegroundColor green
   } catch {
-    Write-Output "Erreur lors de la création de l'unité d’organisation '$NomUO': $($Error[0])"
+    Write-Host "Erreur lors de la création de l'unité d’organisation '$NomUO': $($Error[0])"-ForegroundColor red
   }
 
   $createChildOUs = Read-Host "Voulez-vous créer des sous unités d’organisations dans  '$NomUO'? (O/N)"
