@@ -1,68 +1,69 @@
-###
-# CLASS FOR LOG
-###
+#
+# LOGS
+#
+function Write-Logs {
+    [CmdletBinding()]
+    param(
+        [string]$Type,
+        [string]$Message,
+        [string]$Commentaire,
+        [string]$FilePath
+    )
 
-<#
-    .SYNOPSIS
-    # Cette classe permet de gérer les journaux d'application dans un fichier JSON
-
-    .DESCRIPTION
-    Cette classe permet de gérer les journaux d'application en enregistrant des entrées de journal dans un fichier JSON. Elle fournit des méthodes pour enregistrer des entrées de journal de différents types (erreur, info, avertissement, succès) et pour afficher le contenu du fichier JSON.
-
-    .PARAMETER filejson
-    Description du paramètre
-    Le paramètre `filejson` représente le chemin d'accès au fichier JSON de journaux.
-
-    .EXAMPLE
-    # Créez une nouvelle instance de la classe en spécifiant le chemin d'accès au fichier JSON de journaux
-    $logs = [Logs]::new("C:\mon_log.json")
-
-    # Enregistrez une entrée de journal de type "erreur" avec un message et un commentaire
-    $logs.Error("Erreur critique", "Une erreur critique s'est produite")
-
-    # Affichez le contenu du fichier JSON de journaux
-    $logs.Getlogs()
-
-    .NOTES
-    Notes générales
-#>
-class Logs {
-    [string]$filejson
-
-    Logs([string]$filejson) {
-        $this.filejson = $filejson
+    $date = Get-Date -Format "MM/dd/yyyy HH:mm K"
+    $data = @{
+        $date = @{
+            'Type' = $Type;
+            'Message' = $Message;
+            'Commentaire' = $Commentaire;
+        };
     }
 
-    Setlogs([string]$Type,[string]$Message,[string]$Commentaire) {
-        $date = Get-Date -Format "MM/dd/yyyy HH:mm K"
-        $data = @{
-            $date = @{
-                'Type' = $Type;
-                'Message' = $Message;
-                'Commentaire' = $Commentaire;
-            };
-        }
-        
-
-        $json = $data | ConvertTo-Jso
-        $json | Out-File -FilePath $this.filejson
-    }
-
-    Error([string]$Message,[string]$Commentaire) {
-            $this.Setlogs('Error',$Message,$Commentaire)
-    }
-    Info([string]$Message,[string]$Commentaire) {
-        $this.Setlogs('Info',$Message,$Commentaire)
-    }
-    Warning([string]$Message,[string]$Commentaire) {
-        $this.Setlogs('Warning',$Message,$Commentaire)
-    }
-    Success([string]$Message,[string]$Commentaire) {
-        $this.Setlogs('Success',$Message,$Commentaire)
-    }
-
-
-    [string] Getlogs() {
-        return Get-Content -Path $this.filejson
-    }
+    $json = $data | ConvertTo-Json
+    $json | Out-File -FilePath $FilePath -Append
 }
+
+function Write-Error {
+    param(
+        [string]$Message,
+        [string]$Commentaire,
+        [string]$FilePath
+    )
+    Write-Logs -Type "Error" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
+}
+function Write-Info {
+    param(
+        [string]$Message,
+        [string]$Commentaire,
+        [string]$FilePath
+    )
+    Write-Logs -Type "Info" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
+}
+
+function Write-Warning {
+    param(
+        [string]$Message,
+        [string]$Commentaire,
+        [string]$FilePath
+    )
+    Write-Logs -Type "Warning" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
+}
+function Write-Success {
+    param(
+        [string]$Message,
+        [string]$Commentaire,
+        [string]$FilePath
+    )
+    Write-Logs -Type "Success" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
+}
+
+# 2 possibilité sois je met le type derreur directement dans la fonction sois je met sans en sachant que si  je met les erreur directement
+# a toi de choisir tu prefaire quoi 
+# ducoup j'ai viré la class trop relou ducoup on va garder le fichier psm1
+
+Write-Error -Message "Error message" -Commentaire "Commentaire" -FilePath "logs.json"
+Write-Info -Message "Info message" -Commentaire "Commentaire" -FilePath "logs.json"
+Write-Success -Message "Success message" -Commentaire "Commentaire" -FilePath "logs.json"
+Write-Warning -Message "Warning message" -Commentaire "Commentaire" -FilePath "logs.json"
+
+Write-Logs -Type "Error" -Message "Error message" -Commentaire "Commentaire" -FilePath "logs.json"
