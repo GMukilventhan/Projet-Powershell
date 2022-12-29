@@ -1,4 +1,4 @@
-Import-Module ActiveDirectory
+
 
 #
 # LOGS
@@ -28,39 +28,36 @@ function Write-Logs {
 function Write-Error {
     param(
         [string]$Message,
-        [string]$Commentaire,
-        [string]$FilePath
+        [string]$Commentaire
     )
     Write-Host "-Type Error -Message $Message -Commentaire $Commentaire" -ForegroundColor Red
-    Write-Logs -Type "Error" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
+    Write-Logs -Type "Error" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 function Write-Info {
     param(
         [string]$Message,
-        [string]$Commentaire,
-        [string]$FilePath
+        [string]$Commentaire
     )
     Write-Host "-Type Info -Message $Message -Commentaire $Commentaire" -ForegroundColor Blue
-    Write-Logs -Type "Info" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
+    Write-Logs -Type "Info" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 
 function Write-Warning {
     param(
         [string]$Message,
-        [string]$Commentaire,
-        [string]$FilePath
+        [string]$Commentaire
     )
     Write-Host "-Type Warning -Message $Message -Commentaire $Commentaire" -ForegroundColor Orange
-    Write-Logs -Type "Warning" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
+    Write-Logs -Type "Warning" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 function Write-Success {
     param(
         [string]$Message,
-        [string]$Commentaire,
-        [string]$FilePath
+        [string]$Commentaire
+
     )
     Write-Host "-Type Success -Message $Message -Commentaire $Commentaire" -ForegroundColor Green
-    Write-Logs -Type "Success" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
+    Write-Logs -Type "Success" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 #momo
 function add-allgroupdistribution {
@@ -99,9 +96,9 @@ function New-OufromCsv {
         $OUpath = $OU.path
         try {
             New-ADOrganizationalUnit -Name $OUname -Path $OUpath
-            Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath" -FilePath $filelogs
+            Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath"
         }catch {
-            Write-Success -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath" -FilePath $filelogs
+            Write-Success -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
         }
     }
 }
