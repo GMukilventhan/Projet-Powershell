@@ -11,6 +11,12 @@ $CSVpath = "ou_csv_NOM_A_MODIFIER.csv"
 # Boucle Foreach pour parcourir le fichier CSV
 
 
+$testOu = Get-ADOrganizationalUnit -Filter { name -eq $OU.name}
+if ($testOu -eq $null ){
+    Write-Output 'coucou'
+}else {
+
+
 function New-OufromCsv {
     param (
         $CSVpath
@@ -20,19 +26,16 @@ function New-OufromCsv {
     Foreach($OU in $CSVdata){
         $OUname = $OU.name
         $OUpath = $OU.path
-        $testOu = Get-ADOrganizationalUnit -Filter { name -eq $OU.name}
-        if ($testOu -eq $null ){
-            Write-Output 'coucou'
-        }else {
-            try {
-                New-ADOrganizationalUnit -Name $OUname -Path $OUpath
-            }catch {
-                Write-Host "une erreur est survenu"
-                Write-Host $_.Exception.GetType()
-            }
+        
+        try {
+            New-ADOrganizationalUnit -Name $OUname -Path $OUpath
+        }catch {
+            Write-Host "une erreur est survenu"
+            Write-Host $_.Exception.GetType()
         }
     }
 }
+
 
 
 New-OufromCsv -CSVpath $CSVpath
