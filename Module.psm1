@@ -119,3 +119,20 @@ lister les nombre utilisateur de l'ou sans lui meme
 puis ajouter le nom du délégué dans la variable manager
 
 #>
+function delegue {
+    param (
+        $delegue
+    )
+
+    $deleguer_user = Get-ADUser -Filter "SamAccountName -eq $delegue"
+    $deleguer_user
+    Get-ADUser -SearchBase "OU=Utilisateurs,DC=example,DC=com" | ForEach-Object{
+        if ($_.Utilisateurs -ne $delegue){
+            $_.Utilisateurs
+            # ajout variable
+        }
+    }
+    
+
+}
+
