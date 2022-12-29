@@ -62,6 +62,18 @@ function Write-Success {
     Write-Host "-Type Success -Message $Message -Commentaire $Commentaire" -ForegroundColor Green
     Write-Logs -Type "Success" -Message $Message -Commentaire $Commentaire -FilePath $FilePath
 }
+#momo
+function add-allgroupdistribution {
+
+    $ous = Get-ADOrganizationalUnit -Filter * | Sort-Object Name
+
+    foreach ($ou in $ous)
+    {
+        $groupName = "Distribution Group - $($ou.Name)"
+        New-ADGroup -Name $groupName -Type Distribution -Path $ou.DistinguishedName
+        Write-Host "Group $groupName created in OU $($ou.Name)"
+    }
+}
 
 
 function test-OUexist {
