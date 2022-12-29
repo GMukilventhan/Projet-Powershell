@@ -20,11 +20,11 @@ function New-OufromCsv {
     Foreach($OU in $CSVdata){
         $OUname = $OU.name
         $OUpath = $OU.path
-        $testOu = Get-ADOrganizationalUnit -LDAPFilter "(name=$(OU.name))"
-        if ($null -eq $testOu){
+        $testOu = Get-ADOrganizationalUnit -Filter { name -eq $OU.name}
+        if ($testOu -eq $null ){
             Write-Output 'coucou'
         }else {
-                        try {
+            try {
                 New-ADOrganizationalUnit -Name $OUname -Path $OUpath
             }catch {
                 Write-Host "une erreur est survenu"
