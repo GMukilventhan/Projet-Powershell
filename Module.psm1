@@ -107,3 +107,15 @@ function New-OufromCsv {
         }
     }
 }
+
+
+<#
+Lors de chaque élection du délégué de la promotion, 
+l’ensemble des comptes des élèves sont mis à jour afin de modifier la valeur « manager » 
+des élèves avec la valeur du DistinguishedName du compte de l’élève promu en tant que délégué.
+
+objectif recupéré le nom du délégué puis son ou
+lister les nombre utilisateur de l'ou sans lui meme
+puis ajouter le nom du délégué dans la variable manager
+
+#>

@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-#Import-Module ActiveDirectory
+Import-Module ActiveDirectory
 Import-Module $PSScriptRoot/Module.psm1
 
 $global:filelogs = "logs.json"
