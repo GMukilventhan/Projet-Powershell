@@ -1,53 +1,10 @@
-﻿Import-Module ActiveDirectory
+﻿# Déclaration de la variable globale
+$global:variable = "valeur"
 
-# Pré-requis script :
-# Le fichier CSV dans le chemin indiqué
-# Les unités d'organisation parent BIODEVOPS et enfant ETUDIANTS sont crées
-
-# Import du fichier CSV
-$CSVpath = "ou_csv_NOM_A_MODIFIER.csv"
-
-
-# Boucle Foreach pour parcourir le fichier CSV
-
-
-$testOu = Get-ADOrganizationalUnit -Filter { name -eq $OU.name}
-if ($testOu -eq $null ){
-    Write-Output 'coucou'
-}else {
-
-
-function New-OufromCsv {
-    param (
-        $CSVpath
-    )
-
-    $CSVdata = Import-CSV -Path $CSVpath -Delimiter ";" -Encoding Default
-    Foreach($OU in $CSVdata){
-        $OUname = $OU.name
-        $OUpath = $OU.path
-        
-        try {
-            New-ADOrganizationalUnit -Name $OUname -Path $OUpath
-        }catch {
-            Write-Host "une erreur est survenu"
-            Write-Host $_.Exception.GetType()
-        }
-    }
+# Définition de la fonction qui utilise la variable globale
+function MaFonction {
+    Write-Output $global:variable
 }
 
-
-
-New-OufromCsv -CSVpath $CSVpath
-
-<#
-
-
-$ous = Get-ADOrganizationalUnit -Filter * | Sort-Object Name
-
-foreach ($ou in $ous)
-{
-    $groupName = "Distribution Group - $($ou.Name)"
-    New-ADGroup -Name $groupName -Type Distribution -Path $ou.DistinguishedName
-    Write-Host "Group $groupName created in OU $($ou.Name)"
-}#>
+# Appel de la fonction
+MaFonction
