@@ -94,9 +94,14 @@ function New-OufromCsv {
     Foreach($OU in $CSVdata){
         $OUname = $OU.name
         $OUpath = $OU.path
-        try {
-            New-ADOrganizationalUnit -Name $OUname -Path $OUpath
-            Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath"
+
+        try {        
+            if (test-OUexist){
+                New-ADOrganizationalUnit -Name $OUname -Path $OUpath
+                Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath"
+            }else{
+                Write-Info -Message "existe deja $OUname" -Commentaire "$OUname $OUpath"
+            }
         }catch {
             Write-Success -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
         }
