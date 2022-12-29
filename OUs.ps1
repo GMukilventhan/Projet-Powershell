@@ -20,7 +20,7 @@ function New-OufromCsv {
     Foreach($OU in $CSVdata){
         $OUname = $OU.name
         $OUpath = $OU.path
-        $testOu = Get-ADOrganizationalUnit -LDAPFilter "(name=$(OU.name))"
+        $testOu = Get-ADOrganizationalUnit -LDAPFilter 'name='$OU.name
         if ($null -eq $testOu){
             Write-Output 'coucou'
         }else {
