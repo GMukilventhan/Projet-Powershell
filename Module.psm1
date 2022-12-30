@@ -60,17 +60,37 @@ function Write-Success {
     Write-Logs -Type "Success" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 #momo
-function add-allgroupdistribution {
+function add-Groups-distrib-securityFromOUs
+{
+  param(
+    [Parameter(Mandatory=$true)]
+    [string]$RootOU,
+    [Parameter(Mandatory=$true)]
+    [string]$GroupType,
+    [Parameter(Mandatory=$false)]
+    [string]$GroupScope = "Global",
+    [Parameter(Mandatory=$false)]
+    [string]$GroupCategory = "Security"
+  )
 
-    $ous = Get-ADOrganizationalUnit -Filter * | Sort-Object Name
+  # liste des UO et sous-UO sous la racine
+  $ous = Get-ADOrganizationalUnit -Filter * -SearchBase $RootOU
 
-    foreach ($ou in $ous)
+  # Pour chaque UO ou sous-UO crée un groupe de sécurité ou un groupe de distribution
+  foreach ($ou in $ous)
+  {
+    $groupName = $ou.Name
+    if ($GroupType -eq "Security")
     {
-        $groupName = "Distribution Group - $($ou.Name)"
-        New-ADGroup -Name $groupName -Type Distribution -Path $ou.DistinguishedName
-        Write-Host "Group $groupName created in OU $($ou.Name)"
+      New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory $GroupCategory -GroupScope $GroupScope
     }
+    elseif ($GroupType -eq "Distribution")
+    {
+      New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory "Distribution" -GroupScope $GroupScope
+    }
+  }
 }
+
 
 
 function test-OUexist {
