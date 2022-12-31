@@ -24,7 +24,6 @@ foreach ($User in $CSVdata) {
    $UserClasse = $UserAnnee + "_" + $UserPromotion
    $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
    $GroupName =  $UserAnnee + " - " + $UserPromotion
-
 # Vérifie si le groupe de sécurité existe déjà
 $GroupExists = Get-ADGroup -Filter {Name -eq $GroupName}
 
@@ -33,6 +32,10 @@ if (!$GroupExists)
 {
     New-ADGroup -Name $GroupName -Path $UserPath -GroupScope Global
     Write-Output "Création du groupe de sécurité : $GroupName !"
+}
+else
+{
+    Write-Warning "Attention, le groupe de sécurité $GroupName existe déjà dans l'annuaire !"
 }
 
 if (Get-ADUser -Filter {SamAccountName -eq $UserLogon})
