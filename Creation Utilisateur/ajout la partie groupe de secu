@@ -60,18 +60,18 @@ if (!$GroupExists) {
                   -Company $UserCpny `
                   -Path $UserPath `
                   -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) `
-                  -ChangePasswordAtLogon $false `
-                  -Enabled $true
+                   -ChangePasswordAtLogon $True `
+                   -Enabled $true
        Write-Output "Création de l'utilisateur : $UserLogon !"
        Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserLogon
        Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
 
      
    }
- $user = @{
+$users = @()
+$users += New-Object -TypeName PSObject -Property @{
   "Username" = $UserLogon
   "Password" = $password
 }
-$user.GetEnumerator() | Export-Csv -Path "C:\password.csv" -NoTypeInformatio
+$users | Export-Csv -Path "C:\password.csv" -Append -NoType
 }
-
