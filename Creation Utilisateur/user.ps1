@@ -39,12 +39,8 @@ foreach ($User in $CSVdata) {
    if (!$GroupExists) {
        New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
        Write-Output "Création du groupe de securite : $GroupNameSecurity !"
-
        New-ADGroup -Name $GroupNameDistribution -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
        Write-Output "Création du groupe de distribution : $GroupNameDistribution !"
-
-       #Set-DistributionGroup -Identity $GroupNameDistribution -EmailAddresses @{Add=$GroupDistributionEmail}
-
    }
    
    # Vérifie si l'utilisateur existe déjà
@@ -69,5 +65,8 @@ foreach ($User in $CSVdata) {
                   -Enabled $true
        Write-Output "Création de l'utilisateur : $UserLogon !"
        Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserLogon
+       Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
+
+      
    }
 }
