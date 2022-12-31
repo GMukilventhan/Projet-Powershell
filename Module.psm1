@@ -76,7 +76,7 @@ function add-Groups-distrib-securityFromOUs
   # liste des UO et sous-UO sous la racine
   $ous = Get-ADOrganizationalUnit -Filter * -SearchBase $RootOU
 
-  # Pour chaque UO ou sous-UO crée un groupe de sécurité ou un groupe de distribution
+  # Pour chaque UO ou sous-UO crï¿½e un groupe de sï¿½curitï¿½ ou un groupe de distribution
   foreach ($ou in $ous)
   {
     $groupName = $ou.Name
@@ -139,16 +139,19 @@ lister les nombre utilisateur de l'ou sans lui meme
 puis ajouter le nom du dÃ©lÃ©guÃ© dans la variable manager
 
 #>
-function delegue {
+function set-newdelege {
     param (
-        $delegue
+        $Name_user_master
     )
 
-    $deleguer_user = Get-ADUser -Filter "SamAccountName -eq $delegue"
-    $deleguer_user
+    $User_master = Get-ADUser -Filter "SamAccountName -eq $Name_user_master"
+    #$User_master.OU
+    #get op user
+
     Get-ADUser -SearchBase "OU=Utilisateurs,DC=example,DC=com" | ForEach-Object{
-        if ($_.Utilisateurs -ne $delegue){
+        if ($_.Utilisateurs -ne $User_master.name){
             $_.Utilisateurs
+
             # ajout variable
         }
     }
