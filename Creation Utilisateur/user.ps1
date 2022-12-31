@@ -24,15 +24,16 @@ foreach ($User in $CSVdata) {
     $UserPromotion = $User.Promotion
    $UserClasse = $UserAnnee + "_" + $UserPromotion
    $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
-   $GroupNameSecurity =  "Grp_Secutrite_" + $UserAnnee + "_" + $UserPromotion
+   $GroupNameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
    $GroupNameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
    $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
 
    $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
    
 
-   # Vérifie si le groupe de sécurité existe déjà
+   # Vérifie si le groupe de sécurité et distribution  existe déjà
    $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity} -ErrorAction SilentlyContinue
+   $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution} -ErrorAction SilentlyContinue
 
    # Si le groupe de sécurité n'existe pas, le créer
    if (!$GroupExists) {
@@ -44,16 +45,8 @@ foreach ($User in $CSVdata) {
 
        #Set-DistributionGroup -Identity $GroupNameDistribution -EmailAddresses @{Add=$GroupDistributionEmail}
 
+   }
    
-
-       
-
-   }
-   # Si le groupe de sécurité existe déjà, affiche un message d'avertissement
-   else {
-       Write-Warning "Attention, le groupe de distribution $GroupName existe déjà dans l'annuaire !"
-   }
-
    # Vérifie si l'utilisateur existe déjà
    if (Get-ADUser -Filter {SamAccountName -eq $UserLogon}) {
        Write-Warning "Attention, l'utilisateur $UserLogon existe déjà dans l'annuaire !"
@@ -75,5 +68,6 @@ foreach ($User in $CSVdata) {
                   -ChangePasswordAtLogon $false `
                   -Enabled $true
        Write-Output "Création de l'utilisateur : $UserLogon !"
+       Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserLogon
    }
 }
