@@ -30,13 +30,13 @@ foreach ($User in $CSVdata) {
     $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
 
    # Vérifie si le groupe de sécurité et distribution  existe déjà
-    $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity} -ErrorAction SilentlyContinue
-    $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution} -ErrorAction SilentlyContinue
+$GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity} -ErrorAction SilentlyContinue
+$GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution} -ErrorAction SilentlyContinue
 
 # Si le groupe de sécurité n'existe pas, le créer
-    if (!$GroupExists) {
+if (!$GroupExists) {
     New-ADGroup -Name $GroupNameSecurity -Path $UserPath -GroupScope Global -GroupCategory Security
-    Write-Output "Création du groupe de securite : $GroupNameSecurity !"
+   Write-Output "Création du groupe de securite : $GroupNameSecurity !"
     New-ADGroup -Name $GroupNameDistribution -Path $UserPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
     Write-Output "Création du groupe de distribution : $GroupNameDistribution !"
 }
@@ -45,6 +45,7 @@ foreach ($User in $CSVdata) {
    # Vérifie si l'utilisateur existe déjà
    if (Get-ADUser -Filter {SamAccountName -eq $UserLogon}) {
        Write-Warning "Attention, l'utilisateur $UserLogon existe déjà dans l'annuaire !"
+
    }
    # Si l'utilisateur n'existe pas, le créer
    else {
@@ -60,20 +61,18 @@ foreach ($User in $CSVdata) {
                   -Company $UserCpny `
                   -Path $UserPath `
                   -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) `
-                  -ChangePasswordAtLogon $True `
-                  -Enabled $true
+                   -ChangePasswordAtLogon $True `
+                   -Enabled $true
        Write-Output "Création de l'utilisateur : $UserLogon !"
        Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserLogon
        Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
 
+     
+   }
 $users = @()
-
 $users += New-Object -TypeName PSObject -Property @{
   "Username" = $UserLogon
   "Password" = $password
 }
-
 $users | Export-Csv -Path "C:\password.csv" -Append -NoType
 }
-}
-
