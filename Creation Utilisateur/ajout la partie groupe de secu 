@@ -56,7 +56,9 @@ else
                -ChangePasswordAtLogon $false `
                -Enabled $true
     Write-Output "Création de l'utilisateur : $UserLogon !"
-
+    # Ajoute l'utilisateur au groupe de sécurité correspondant
+    Add-ADGroupMember -Identity $GroupName -Members $UserLogon
+    Write-Output "Ajout de l'utilisateur $UserLogon au groupe de sécurité $GroupName !"
 }
 }
 }
