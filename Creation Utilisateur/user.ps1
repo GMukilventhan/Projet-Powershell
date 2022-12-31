@@ -13,7 +13,7 @@ foreach ($User in $CSVdata) {
     $UserLastname = $User.Lastname.ToUpper()
     $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
     $UserLogon = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
-    $UserPassword = $User.Password
+    $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 8 | %{[char]$_})
     $UPN = "$UserLogon@biodevops.local"
     $UserEmail = "$UserLogon@biodevops.eu"
     $UserTitle = $User.Title
@@ -25,23 +25,22 @@ foreach ($User in $CSVdata) {
    $UserClasse = $UserAnnee + "_" + $UserPromotion
    $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
    $GroupNameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
-   $GroupNameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
-   $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
-
-   $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
-   
+    $GroupNameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
+    $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
+    $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
 
    # Vérifie si le groupe de sécurité et distribution  existe déjà
-   $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity} -ErrorAction SilentlyContinue
-   $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution} -ErrorAction SilentlyContinue
+    $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity} -ErrorAction SilentlyContinue
+    $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution} -ErrorAction SilentlyContinue
 
-   # Si le groupe de sécurité n'existe pas, le créer
-   if (!$GroupExists) {
-       New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
-       Write-Output "Création du groupe de securite : $GroupNameSecurity !"
-       New-ADGroup -Name $GroupNameDistribution -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
-       Write-Output "Création du groupe de distribution : $GroupNameDistribution !"
-   }
+# Si le groupe de sécurité n'existe pas, le créer
+    if (!$GroupExists) {
+    New-ADGroup -Name $GroupNameSecurity -Path $UserPath -GroupScope Global -GroupCategory Security
+    Write-Output "Création du groupe de securite : $GroupNameSecurity !"
+    New-ADGroup -Name $GroupNameDistribution -Path $UserPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
+    Write-Output "Création du groupe de distribution : $GroupNameDistribution !"
+}
+
    
    # Vérifie si l'utilisateur existe déjà
    if (Get-ADUser -Filter {SamAccountName -eq $UserLogon}) {
@@ -60,13 +59,21 @@ foreach ($User in $CSVdata) {
                   -Department $UserClasse `
                   -Company $UserCpny `
                   -Path $UserPath `
-                  -AccountPassword (ConvertTo-SecureString $UserPassword -AsPlainText -Force) `
-                  -ChangePasswordAtLogon $false `
+                  -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) `
+                  -ChangePasswordAtLogon $True `
                   -Enabled $true
        Write-Output "Création de l'utilisateur : $UserLogon !"
        Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserLogon
        Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
 
-      
-   }
+$users = @()
+
+$users += New-Object -TypeName PSObject -Property @{
+  "Username" = $UserLogon
+  "Password" = $password
 }
+
+$users | Export-Csv -Path "C:\password.csv" -Append -NoType
+}
+}
+
