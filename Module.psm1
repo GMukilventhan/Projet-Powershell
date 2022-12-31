@@ -76,7 +76,7 @@ function add-Groups-distrib-securityFromOUs
   # liste des UO et sous-UO sous la racine
   $ous = Get-ADOrganizationalUnit -Filter * -SearchBase $RootOU
 
-  # Pour chaque UO ou sous-UO crée un groupe de sécurité ou un groupe de distribution
+  # Pour chaque UO ou sous-UO crï¿½e un groupe de sï¿½curitï¿½ ou un groupe de distribution
   foreach ($ou in $ous)
   {
     $groupName = $ou.Name
@@ -89,7 +89,19 @@ function add-Groups-distrib-securityFromOUs
       New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory "Distribution" -GroupScope $GroupScope
     }
   }
+  foreach ($group in $groups)
+{
+  foreach ($user in $users)
+  {
+    if ($user.Department -eq $group.Name)
+    {
+      Add-ADGroupMember -Identity $group -Members $user
+    }
+  }
 }
+
+}
+
 
 
 
