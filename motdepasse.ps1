@@ -3,8 +3,6 @@ $idunique = "mowazane"
 
 New-ADUser -Name "wazane mohamed" -SamAccountName $idunique -UserPrincipalName "mowazane@biodevops.eu" -GivenName "mohamed" -Surname "wazane" -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -Enabled $true -Path "OU=Utilisateurs,DC=BIODEVOPS,DC=INFRA"
 
- 
-
 $user = @{
   "Username" = $idunique
   "Password" = $password
