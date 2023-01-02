@@ -4,5 +4,5 @@ Import-Module $PSScriptRoot/Module.psm1
 
 $global:filelogs = "Logs/OU.json"
 
-Write-Success -Message "pas d'erreur" -Commentaire "mon super commentaire" -FilePath $filelogs
-test-OUexist -OUname "test"
+$CSVpath = "OU_PROMOTION.csv"
+New-OufromCsv -CSVpath $CSVpath

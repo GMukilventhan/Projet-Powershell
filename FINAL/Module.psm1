@@ -59,6 +59,63 @@ function Write-Success {
     Write-Host "-Type Success -Message $Message -Commentaire $Commentaire" -ForegroundColor Green
     Write-Logs -Type "Success" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
+
+function test-OUexist {
+    param (
+        $OUname
+    )
+
+    $ou = Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$ouName'"
+    if ($ou) {
+        return $true
+    }else{
+        return $false
+    }
+}
+
+function New-OufromCsv {
+    param (
+        $CSVpath
+    )
+    $CSVdata = Import-CSV -Path $CSVpath -Delimiter ";" -Encoding Default
+    Foreach($OU in $CSVdata){
+        $OUname = $OU.name
+        $OUpath = $OU.path
+
+        try {        
+            if (test-OUexist){
+                New-ADOrganizationalUnit -Name $OUname -Path $OUpath
+                Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath"
+            }else{
+                Write-Info -Message "existe deja $OUname" -Commentaire "$OUname $OUpath"
+            }
+        }catch {
+            Write-Success -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #momo
 function add-Groups-distrib-securityFromOUs
 {
@@ -100,40 +157,7 @@ function add-Groups-distrib-securityFromOUs
 
 
 
-function test-OUexist {
-    param (
-        $OUname
-    )
 
-    $ou = Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$ouName'"
-    if ($ou) {
-        return $true
-    }else{
-        return $false
-    }
-}
-
-function New-OufromCsv {
-    param (
-        $CSVpath
-    )
-    $CSVdata = Import-CSV -Path $CSVpath -Delimiter ";" -Encoding Default
-    Foreach($OU in $CSVdata){
-        $OUname = $OU.name
-        $OUpath = $OU.path
-
-        try {        
-            if (test-OUexist){
-                New-ADOrganizationalUnit -Name $OUname -Path $OUpath
-                Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath"
-            }else{
-                Write-Info -Message "existe deja $OUname" -Commentaire "$OUname $OUpath"
-            }
-        }catch {
-            Write-Success -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
-        }
-    }
-}
 
 
 <#
