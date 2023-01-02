@@ -62,44 +62,39 @@ function Write-Success {
 #momo
 function add-Groups-distrib-securityFromOUs
 {
-  param(
-    [Parameter(Mandatory=$true)]
-    [string]$RootOU,
-    [Parameter(Mandatory=$true)]
-    [string]$GroupType,
-    [Parameter(Mandatory=$false)]
-    [string]$GroupScope = "Global",
-    [Parameter(Mandatory=$false)]
-    [string]$GroupCategory = "Security"
-  )
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$RootOU,
+        [Parameter(Mandatory=$true)]
+        [string]$GroupType,
+        [Parameter(Mandatory=$false)]
+        [string]$GroupScope = "Global",
+        [Parameter(Mandatory=$false)]
+        [string]$GroupCategory = "Security"
+    )
 
-  # liste des UO et sous-UO sous la racine
-  $ous = Get-ADOrganizationalUnit -Filter * -SearchBase $RootOU
+    # liste des UO et sous-UO sous la racine
+    $ous = Get-ADOrganizationalUnit -Filter * -SearchBase $RootOU
 
-  # Pour chaque UO ou sous-UO cr�e un groupe de s�curit� ou un groupe de distribution
-  foreach ($ou in $ous)
-  {
-    $groupName = $ou.Name
-    if ($GroupType -eq "Security")
-    {
-      New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory $GroupCategory -GroupScope $GroupScope
+    # Pour chaque UO ou sous-UO cr�e un groupe de s�curit� ou un groupe de distribution
+    foreach ($ou in $ous){
+        $groupName = $ou.Name
+        if ($GroupType -eq "Security"){
+            New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory $GroupCategory -GroupScope $GroupScope
+        }
+        elseif ($GroupType -eq "Distribution"){
+            New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory "Distribution" -GroupScope $GroupScope
+        }
     }
-    elseif ($GroupType -eq "Distribution")
-    {
-      New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory "Distribution" -GroupScope $GroupScope
+    <#
+    foreach ($group in $groups){
+        foreach ($user in $users){
+            if ($user.Department -eq $group.Name){
+                Add-ADGroupMember -Identity $group -Members $user
+            }
+        }
     }
-  }
-  foreach ($group in $groups)
-{
-  foreach ($user in $users)
-  {
-    if ($user.Department -eq $group.Name)
-    {
-      Add-ADGroupMember -Identity $group -Members $user
-    }
-  }
-}
-
+    #>
 }
 
 
