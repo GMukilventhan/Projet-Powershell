@@ -4,7 +4,14 @@ Import-Module $PSScriptRoot/Module.psm1
 
 $global:filelogs = "Logs/Modif.json"
 
+# TODO mettre de truc en fonction
+# TODO mettre des try viré tous les silence continue
+# TODO FONTION MDP EXPLIQUER OU A REFAIRE
+# TODO METTRE A JOUR LE CSV !!!
+# TODO FAIRE LES LOGS
+# TODO EXPORT CSV END SCRIPT
 
+# TODO RELIRE LE SCRIPT REFAIRE L'ALGO THEO
 
 # Importe les données du fichier CSV
 $CSVpath = "CSV/user.csv"
@@ -35,6 +42,7 @@ foreach ($User in $CSVdata) {
     $currentYear = (Get-Date).Year
     $uniqueRandomNumbers = @()
 
+    #FIXME count
     for ($i = 0; $i -lt 10; $i++) {
         $uniqueRandomNumbers += Get-Random -Minimum 0 -Maximum 9
     }
@@ -44,6 +52,7 @@ foreach ($User in $CSVdata) {
     # Vérifie si le groupe de sécurité et distribution  existe déjà
     # tester
     #FIXME: a refaire 
+
     $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity} -ErrorAction SilentlyContinue
     $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution} -ErrorAction SilentlyContinue
 
