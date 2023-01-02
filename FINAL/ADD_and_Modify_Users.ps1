@@ -42,7 +42,7 @@ foreach ($User in $CSVdata) {
     $uniqueRandomNumbers = @()
     $UserActivation = $User.Activation
 
-    #FIXME count à revoir - count 
+
     for ($i = 0; $i -lt 10; $i++) {
         $uniqueRandomNumbers += Get-Random -Minimum 0 -Maximum 9
     }
@@ -58,7 +58,8 @@ foreach ($User in $CSVdata) {
 
     if (!$GroupSecurityExists) {
         New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
-        Write-Success -Message "Création du groupe de sécurité !" -Commentaire " #mettre le commentaire detaillé "
+        Write-Success -Message "Succès création groupe de sécurité !" -Commentaire $GroupNameSecurity
+
     }
 
     try {
@@ -69,7 +70,7 @@ foreach ($User in $CSVdata) {
 
     if (!$GroupDistributionExists) {
         New-ADGroup -Name $GroupNameDistribution -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
-        Write-Output "Création du groupe de distribution : $GroupNameDistribution !"
+        Write-Success -Message "Succès création groupe de distribution :-Commentaire "  $GroupNameDistribution
     }
 
     $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
@@ -108,7 +109,7 @@ foreach ($User in $CSVdata) {
             -ChangePasswordAtLogon $True `
             -Enabled $UserActivation
 
-        Write-Output "Création de l'utilisateur : $UserDisplay !"
+        Write-Success -Message "Succès création de l'utilisateur!" -Commentaire $UserDisplay
         Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
         Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
     }
