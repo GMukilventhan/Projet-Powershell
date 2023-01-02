@@ -1,4 +1,4 @@
-UPN;Firstname;Lastname;Title;Company;Annee;Filiere;AnneeEtude;Promotion;Delegue;Compte
+UPN;Firstname;Lastname;Title;Company;Annee;Filiere;AnneeEtude;Promotion;Delegue;Activation
 Null;Maxime;Habermann;Etudiant;BioDevops;2023;PSSI;5A;5PSSI2;false;true
 Null;Théo;Payen;Etudiant;BioDevops;2023;PSSI;5A;5PSSI2;false;true
 Null;Mohamed;Wazane;Etudiant;BioDevops;2023;PSSI;5A;5PSSI2;false;true
