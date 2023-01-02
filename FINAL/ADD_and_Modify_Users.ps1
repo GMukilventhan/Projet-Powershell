@@ -4,13 +4,11 @@ Import-Module $PSScriptRoot/Module.psm1
 
 $global:filelogs = "Logs/Modif.json"
 
-# TODO mettre de truc en fonction
 
-# TODO mettre des try viré tous les silence continue FAIT 
-# TODO FONTION MDP EXPLIQUER OU A REFAIRE FAIT 
-# TODO METTRE A JOUR LE CSV !!! FAIT 
+# TODO FAIRE DES COMMENATIRES 
+# TODO FAIRE LES LOGS exemple Write-Success -Message "Création du groupe de sécurité !" -Commentaire " #mettre le commentaire detaillé "
 
-# TODO FAIRE LES LOGS PLUS TARD
+
 # TODO EXPORT CSV END SCRIPT PLUS TARD 
 
 # TODO RELIRE LE SCRIPT REFAIRE L'ALGO THEO
@@ -44,16 +42,13 @@ foreach ($User in $CSVdata) {
     $uniqueRandomNumbers = @()
     $UserActivation = $User.Activation
 
-    #FIXME count
+    #FIXME count à revoir - count 
     for ($i = 0; $i -lt 10; $i++) {
         $uniqueRandomNumbers += Get-Random -Minimum 0 -Maximum 9
     }
-  
+
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
-    # Vérifie si le groupe de sécurité et distribution  existe déjà
-    # tester
-    #FIXME: a refaire  FAIT mais check si ca marche
 
     try {
         $GroupSecurityExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity}
@@ -63,7 +58,7 @@ foreach ($User in $CSVdata) {
 
     if (!$GroupSecurityExists) {
         New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
-        Write-Output "Création du groupe de sécurité : $GroupNameSecurity !"
+        Write-Success -Message "Création du groupe de sécurité !" -Commentaire " #mettre le commentaire detaillé "
     }
 
     try {
