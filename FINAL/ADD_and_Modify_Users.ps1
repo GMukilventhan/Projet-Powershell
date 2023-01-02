@@ -5,11 +5,13 @@ Import-Module $PSScriptRoot/Module.psm1
 $global:filelogs = "Logs/Modif.json"
 
 # TODO mettre de truc en fonction
-# TODO mettre des try viré tous les silence continue
-# TODO FONTION MDP EXPLIQUER OU A REFAIRE
-# TODO METTRE A JOUR LE CSV !!!
-# TODO FAIRE LES LOGS
-# TODO EXPORT CSV END SCRIPT
+
+# TODO mettre des try viré tous les silence continue FAIT 
+# TODO FONTION MDP EXPLIQUER OU A REFAIRE FAIT 
+# TODO METTRE A JOUR LE CSV !!! FAIT 
+
+# TODO FAIRE LES LOGS PLUS TARD
+# TODO EXPORT CSV END SCRIPT PLUS TARD 
 
 # TODO RELIRE LE SCRIPT REFAIRE L'ALGO THEO
 
@@ -23,11 +25,11 @@ foreach ($User in $CSVdata) {
     $UserFirstname = $User.Firstname
     $UserLastname = $User.Lastname.ToUpper()
     $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
-    $UserLogon = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
-    $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 8 | %{[char]$_})
-    $UPN = $UserLogon + "@biodevops.local"
-    $UserEmail = $UserLogon + "@biodevops.eu"
-    $UserTitle = $User.Title
+    $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
+    $password = New-RandomSecurePassword -Length 12 -Characters 'A-Za-z0-9!@#$%^&*_-'
+    $UPN = $UserFirstnameLastname + "@biodevops.local"
+    $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
+    $UserTitle = "Etudiant"
     $UserCpny = $User.Company
     $UserAnnee = $User.Annee
     $UserAnneeEtude = $User.AnneeEtude
@@ -39,32 +41,43 @@ foreach ($User in $CSVdata) {
     $GroupNameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
     $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
     $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
-    $currentYear = (Get-Date).Year
     $uniqueRandomNumbers = @()
+    $UserActivation = $User.Activation
 
     #FIXME count
     for ($i = 0; $i -lt 10; $i++) {
         $uniqueRandomNumbers += Get-Random -Minimum 0 -Maximum 9
     }
-
-    $uniqueId = "U" + $currentYear + (-join $uniqueRandomNumbers)
+  
+    $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
     # Vérifie si le groupe de sécurité et distribution  existe déjà
     # tester
-    #FIXME: a refaire 
+    #FIXME: a refaire  FAIT mais check si ca marche
 
-    $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity} -ErrorAction SilentlyContinue
-    $GroupExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution} -ErrorAction SilentlyContinue
+    try {
+        $GroupSecurityExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity}
+    } catch {
+        $GroupSecurityExists = $false
+    }
 
-    # Si le groupe de sécurité n'existe pas, le créer
-    if (!$GroupExists) {
-        New-ADGroup -Name $GroupNameSecurity -Path $UserPath -GroupScope Global -GroupCategory Security
-        Write-Output "Création du groupe de securite : $GroupNameSecurity !"
-        New-ADGroup -Name $GroupNameDistribution -Path $UserPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
+    if (!$GroupSecurityExists) {
+        New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
+        Write-Output "Création du groupe de sécurité : $GroupNameSecurity !"
+    }
+
+    try {
+        $GroupDistributionExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution}
+    } catch {
+        $GroupDistributionExists = $false
+    }
+
+    if (!$GroupDistributionExists) {
+        New-ADGroup -Name $GroupNameDistribution -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
         Write-Output "Création du groupe de distribution : $GroupNameDistribution !"
     }
 
-    $UserExists = Get-ADUser -Filter {SamAccountName -eq $uniqueId}
+    $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
 
     # Si l'utilisateur existe déjà
     #
@@ -76,12 +89,12 @@ foreach ($User in $CSVdata) {
         # Génère un nouveau nom d'utilisateur en ajoutant un numéro au nom de l'utilisateur
         $i = 1
         while ($UserExists) {
-            $UserLogon = $UserFirstname.ToLower() + "." + $UserLastname.ToLower() + $i
-            $UPN = $UserLogon + "@biodevops.local"
-            $UserEmail = $UserLogon + "@biodevops.eu"
-            $UserExists = Get-ADUser -Filter {SamAccountName -eq $uniqueId} -ErrorAction SilentlyContinue
+            $UserFirstnameLastname = $UserFirstnameLastname + $i
+            $UPN = $UserFirstnameLastname + "@biodevops.local"
+            $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
+            $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId} SilentlyContinue
             $i++
-            $UserDisplay = $UserFirstname + $UserLastname + $i
+            $UserDisplay = $UserDisplay + $i
         }
     }else {
         New-ADUser `
@@ -89,7 +102,7 @@ foreach ($User in $CSVdata) {
             -GivenName $UserFirstname `
             -Surname $UserLastname `
             -DisplayName $UserDisplay `
-            -SamAccountName $UserLogon `
+            -SamAccountName $UniqueId `
             -UserPrincipalName $UPN `
             -EmailAddress $UserEmail `
             -Title $UserTitle `
@@ -98,16 +111,16 @@ foreach ($User in $CSVdata) {
             -Path $UserPath `
             -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) `
             -ChangePasswordAtLogon $True `
-            -Enabled $true
+            -Enabled $UserActivation
 
         Write-Output "Création de l'utilisateur : $UserDisplay !"
-        Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserLogon
+        Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
         Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
     }
 
     $users = @()
     $users += New-Object -TypeName PSObject -Property @{
-        "Username" = $UserLogon
+        "Username" = $UserFirstnameLastname
         "Password" = $password
     }
     $users | Export-Csv -Path "C:\password.csv" -Append -NoType
