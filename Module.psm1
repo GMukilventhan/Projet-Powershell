@@ -89,7 +89,19 @@ function add-Groups-distrib-securityFromOUs
       New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory "Distribution" -GroupScope $GroupScope
     }
   }
+  foreach ($group in $groups)
+{
+  foreach ($user in $users)
+  {
+    if ($user.Department -eq $group.Name)
+    {
+      Add-ADGroupMember -Identity $group -Members $user
+    }
+  }
 }
+
+}
+
 
 
 

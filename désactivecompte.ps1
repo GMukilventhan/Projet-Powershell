@@ -1,5 +1,4 @@
-﻿
-$users = Import-Csv -Path "C:\users.csv"
+﻿$users = Import-Csv -Path "C:\users.csv"
 
 foreach ($user in $users) {
   # Récupére l'objet utilisateur correspondant dans Active Directory
