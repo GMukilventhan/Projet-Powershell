@@ -155,7 +155,4 @@ function set-newdelege {
             # ajout variable
         }
     }
-    
-
 }
-
