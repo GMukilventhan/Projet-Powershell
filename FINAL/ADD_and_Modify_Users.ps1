@@ -6,8 +6,7 @@ $global:filelogs = "Logs/Modif.json"
 
 
 # TODO FAIRE DES COMMENATIRES 
-# TODO FAIRE LES LOGS exemple Write-Success -Message "Création du groupe de sécurité !" -Commentaire " #mettre le commentaire detaillé "
-
+# TODO log ligne 76 -85 homonyme et log partie export csv password 114 + log la partie création de groupe 106 - 107 
 
 # TODO EXPORT CSV END SCRIPT PLUS TARD 
 
@@ -42,7 +41,6 @@ foreach ($User in $CSVdata) {
     $uniqueRandomNumbers = @()
     $UserActivation = $User.Activation
 
-
     for ($i = 0; $i -lt 10; $i++) {
         $uniqueRandomNumbers += Get-Random -Minimum 0 -Maximum 9
     }
@@ -58,7 +56,7 @@ foreach ($User in $CSVdata) {
 
     if (!$GroupSecurityExists) {
         New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
-        Write-Success -Message "Succès création groupe de sécurité !" -Commentaire $GroupNameSecurity
+        Write-Success -Message "Succès création groupe de sécurité :" -Commentaire $GroupNameSecurity
 
     }
 
@@ -70,16 +68,10 @@ foreach ($User in $CSVdata) {
 
     if (!$GroupDistributionExists) {
         New-ADGroup -Name $GroupNameDistribution -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
-        Write-Success -Message "Succès création groupe de distribution :-Commentaire "  $GroupNameDistribution
+        Write-Success -Message "Succès création groupe de distribution :" -Commentaire $GroupNameDistribution
     }
 
     $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
-
-    # Si l'utilisateur existe déjà
-    #
-    # faire attention de fouuuu malade
-    #
-    #
 
     if ($UserExists) {
         # Génère un nouveau nom d'utilisateur en ajoutant un numéro au nom de l'utilisateur
@@ -109,7 +101,7 @@ foreach ($User in $CSVdata) {
             -ChangePasswordAtLogon $True `
             -Enabled $UserActivation
 
-        Write-Success -Message "Succès création de l'utilisateur!" -Commentaire $UserDisplay
+        Write-Success -Message "Succès création de l'utilisateur :" -Commentaire $UserDisplay
         Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
         Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
     }
