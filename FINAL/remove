@@ -1,6 +1,9 @@
 $ErrorActionPreference = "Stop"
 Import-Module ActiveDirectory
 Import-Module $PSScriptRoot/Module.psm1
+
+$global:filelogs = "Logs/remove.json"
+
 $users = Get-ADUser -Filter *
 #TODO LOGS
 foreach ($user in $users) {
