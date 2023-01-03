@@ -47,7 +47,7 @@ foreach ($User in $CSVdata) {
 
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
-    #TODO A REFAIRE !!!!
+
     try {
         $GroupSecurityExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity}
     } catch {
@@ -57,7 +57,6 @@ foreach ($User in $CSVdata) {
     if (!$GroupSecurityExists) {
         New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
         Write-Success -Message "Succès création groupe de sécurité :" -Commentaire $GroupNameSecurity
-
     }
 
     try {

@@ -5,7 +5,7 @@ mettre les informations dans des variables
 
 
 
-Verrifie si le champs Uid est a null 
+Verrifie si le champs info unique  est a null 
 si      il est a null
         boucle do true
                 on build son nom ad / + 1 si boucle
@@ -34,7 +34,8 @@ sinon   il est non null
                 puis ajouter le nom du délégué dans la variable manager
                 #>
 
-        # RIEN SINON
+        SINON
+                error
                 #on passe
 
 
