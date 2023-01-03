@@ -19,7 +19,7 @@ foreach ($User in $CSVdata) {
     $UserLastname = $User.Lastname.ToUpper()
     $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
-    $password = New-RandomSecurePassword -Length 12 -Characters 'A-Za-z0-9!@#$%^&*_-'
+    $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 8 | %{[char]$_})
     $UPN = $UserFirstnameLastname + "@biodevops.local"
     $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
     $UserTitle = "Etudiant"
