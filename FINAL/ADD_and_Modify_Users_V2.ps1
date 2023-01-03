@@ -23,7 +23,7 @@ foreach ($User in $CSVdata) {
     $UserLastname = $User.Lastname.ToUpper()
     $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
-    $password = New-RandomSecurePassword -Length 12 -Characters 'A-Za-z0-9!@#$%^&*_-'
+    $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 8 | %{[char]$_})
     $UPN = $UserFirstnameLastname + "@biodevops.local"
     $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
     $UserTitle = "Etudiant"
@@ -41,12 +41,9 @@ foreach ($User in $CSVdata) {
     $uniqueRandomNumbers = @()
     $UserActivation = $User.Activation
 
-    for ($i = 0; $i -lt 10; $i++) {
-        $uniqueRandomNumbers += Get-Random -Minimum 0 -Maximum 9
-    }
+    $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
 
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
-
 
     try {
         $GroupSecurityExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity}
