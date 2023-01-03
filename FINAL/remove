@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 Import-Module ActiveDirectory
 Import-Module $PSScriptRoot/Module.psm1
 $users = Get-ADUser -Filter *
-
+#TODO LOGS
 foreach ($user in $users) {
     if ($user.Enabled -eq $false) {
         $disableDate = $user.AccountDisabledDate
