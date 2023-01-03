@@ -5,12 +5,8 @@ Import-Module $PSScriptRoot/Module.psm1
 $global:filelogs = "Logs/Modif.json"
 
 
-# TODO FAIRE DES COMMENATIRES 
-# TODO log ligne 76 -85 homonyme et log partie export csv password 114 + log la partie création de groupe 106 - 107 
-
 # TODO EXPORT CSV END SCRIPT PLUS TARD 
 
-# TODO RELIRE LE SCRIPT REFAIRE L'ALGO THEO
 
 # Importe les données du fichier CSV
 $CSVpath = "CSV/user.csv"
@@ -18,7 +14,7 @@ $CSVdata = Import-CSV -Path $CSVpath -Delimiter ";" -Encoding Default
 
 # Pour chaque ligne du fichier CSV
 foreach ($User in $CSVdata) {
-
+    $UserUPN = $User.UPN
     $UserFirstname = $User.Firstname
     $UserLastname = $User.Lastname.ToUpper()
     $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
@@ -38,53 +34,25 @@ foreach ($User in $CSVdata) {
     $GroupNameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
     $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
     $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
-    $uniqueRandomNumbers = @()
+
     $UserActivation = $User.Activation
 
-    for ($i = 0; $i -lt 10; $i++) {
-        $uniqueRandomNumbers += Get-Random -Minimum 0 -Maximum 9
-    }
-
+    $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
-
-    try {
-        $GroupSecurityExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity}
-    } catch {
-        $GroupSecurityExists = $false
-    }
-
-    if (!$GroupSecurityExists) {
-        New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
-        Write-Success -Message "Succès création groupe de sécurité :" -Commentaire $GroupNameSecurity
-    }
-
-    try {
-        $GroupDistributionExists = Get-ADGroup -Filter {Name -eq $GroupNameDistribution}
-    } catch {
-        $GroupDistributionExists = $false
-    }
-
-    if (!$GroupDistributionExists) {
-        New-ADGroup -Name $GroupNameDistribution -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
-        Write-Success -Message "Succès création groupe de distribution :" -Commentaire $GroupNameDistribution
-    }
-
-    $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
-
-    if ($UserExists) {
-        # Génère un nouveau nom d'utilisateur en ajoutant un numéro au nom de l'utilisateur
+    if ($UserUPN -eq "Null"){            
+        $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
         $i = 1
         while ($UserExists) {
             $UserFirstnameLastname = $UserFirstnameLastname + $i
             $UPN = $UserFirstnameLastname + "@biodevops.local"
             $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
-            $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId} SilentlyContinue
+            $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
             $i++
             $UserDisplay = $UserDisplay + $i
         }
-    }else {
-        New-ADUser `
+        try {
+            New-ADUser `
             -Name $UserDisplay `
             -GivenName $UserFirstname `
             -Surname $UserLastname `
@@ -100,9 +68,30 @@ foreach ($User in $CSVdata) {
             -ChangePasswordAtLogon $True `
             -Enabled $UserActivation
 
-        Write-Success -Message "Succès création de l'utilisateur :" -Commentaire $UserDisplay
-        Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
-        Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
+            Write-Success -Message "création de l'utilisateur :" -Commentaire $UserDisplay
+        }catch {
+            Write-Warning -Message "création de l'utilisateur impossible:" -Commentaire $UserDisplay
+        }
+
+
+        try {
+            Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
+            Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
+        }catch {
+            Write-Warning -Message "error" -Commentaire "error"
+        }
+
+    }else {
+        $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
+        if ($UserExists) {
+            # get les info de l'ad
+            # comparaison
+            #
+            # GET info AD
+            # if infoAD pas= INFOCSV si oui #a modifier infoCSV > infoAD
+        }else{
+            echo "error"
+        }
     }
 
     $users = @()

@@ -1,20 +1,20 @@
 
-get les information du csv     
+ok get les information du csv     
 #Verrifier si les information son coérante 
-mettre les informations dans des variables
+ok mettre les informations dans des variables
 
 
 
-Verrifie si le champs info unique  est a null 
-si      il est a null
-        boucle do true
-                on build son nom ad / + 1 si boucle
-                on verrifie si l'utilisateur existe
-                Si il existe pas
-                        alors on crée un nouvel utilisateur
-                        on enregistre dans un tableau les mots de passe pour l'exportation
-                        break
-                si il existe on ajoute 1 
+okVerrifie si le champs info unique  est a null 
+                        oksi      il est a null
+                                boucle do true
+                                        on build son nom ad / + 1 si boucle
+                                        on verrifie si l'utilisateur existe
+                                        Si il existe pas
+                                                alors on crée un nouvel utilisateur
+                                                on enregistre dans un tableau les mots de passe pour l'exportation
+                                                break
+                                        si il existe on ajoute 1 
  
 
 sinon   il est non null   
