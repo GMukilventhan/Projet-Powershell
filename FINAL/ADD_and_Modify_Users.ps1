@@ -4,13 +4,10 @@ Import-Module $PSScriptRoot/Module.psm1
 
 $global:filelogs = "Logs/Modif.json"
 
-# TODO mettre de truc en fonction
 
-# TODO mettre des try viré tous les silence continue FAIT 
-# TODO FONTION MDP EXPLIQUER OU A REFAIRE FAIT 
-# TODO METTRE A JOUR LE CSV !!! FAIT 
+# TODO FAIRE DES COMMENATIRES 
+# TODO log ligne 76 -85 homonyme et log partie export csv password 114 + log la partie création de groupe 106 - 107 
 
-# TODO FAIRE LES LOGS PLUS TARD
 # TODO EXPORT CSV END SCRIPT PLUS TARD 
 
 # TODO RELIRE LE SCRIPT REFAIRE L'ALGO THEO
@@ -44,16 +41,12 @@ foreach ($User in $CSVdata) {
     $uniqueRandomNumbers = @()
     $UserActivation = $User.Activation
 
-    #FIXME count
     for ($i = 0; $i -lt 10; $i++) {
         $uniqueRandomNumbers += Get-Random -Minimum 0 -Maximum 9
     }
-  
+
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
-    # Vérifie si le groupe de sécurité et distribution  existe déjà
-    # tester
-    #FIXME: a refaire  FAIT mais check si ca marche
 
     try {
         $GroupSecurityExists = Get-ADGroup -Filter {Name -eq $GroupNameSecurity}
@@ -63,7 +56,8 @@ foreach ($User in $CSVdata) {
 
     if (!$GroupSecurityExists) {
         New-ADGroup -Name $GroupNameSecurity -Path $GroupPath -GroupScope Global -GroupCategory Security
-        Write-Output "Création du groupe de sécurité : $GroupNameSecurity !"
+        Write-Success -Message "Succès création groupe de sécurité :" -Commentaire $GroupNameSecurity
+
     }
 
     try {
@@ -74,16 +68,10 @@ foreach ($User in $CSVdata) {
 
     if (!$GroupDistributionExists) {
         New-ADGroup -Name $GroupNameDistribution -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
-        Write-Output "Création du groupe de distribution : $GroupNameDistribution !"
+        Write-Success -Message "Succès création groupe de distribution :" -Commentaire $GroupNameDistribution
     }
 
     $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
-
-    # Si l'utilisateur existe déjà
-    #
-    # faire attention de fouuuu malade
-    #
-    #
 
     if ($UserExists) {
         # Génère un nouveau nom d'utilisateur en ajoutant un numéro au nom de l'utilisateur
@@ -113,7 +101,7 @@ foreach ($User in $CSVdata) {
             -ChangePasswordAtLogon $True `
             -Enabled $UserActivation
 
-        Write-Output "Création de l'utilisateur : $UserDisplay !"
+        Write-Success -Message "Succès création de l'utilisateur :" -Commentaire $UserDisplay
         Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
         Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
     }
