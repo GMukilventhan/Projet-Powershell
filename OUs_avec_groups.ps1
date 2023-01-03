@@ -1,4 +1,4 @@
-﻿Import-Module ActiveDirectory
+Import-Module ActiveDirectory
 
 # Pré-requis script :
 # Le fichier CSV dans le chemin indiqué
@@ -26,8 +26,12 @@ If(($OUsecurityGroup -eq "true") -and ($OUdistributionGroup -eq "true"))
 { 
   New-ADGroup -Name $SecurityGroupName -Path $GroupPath -GroupScope Global -GroupCategory Security
   Write-Host "Création du groupe de sécurité « $SecurityGroupName » pour la promotion « $OUname »"
-  New-ADGroup -Name $DistributionGroupName -Path $GroupPath -GroupScope Global -GroupCategory Distribution
-  Write-Host "Création du groupe de distribution « $DistributionGroupName » pour la promotion « $OUname »"
+
+  $GroupDistributionEmail = $OUname.Split('_')[1] + "." + $OUname.Split('_')[0] + "@biodevops.eu"
+
+  New-ADGroup -Name $DistributionGroupName -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
+  Write-Host "Création du groupe de distribution « $DistributionGroupName » pour la promotion « $OUname » associé à l'e-mail « $GroupDistributionEmail »"
+
 }
 Else{
   Write-Host "Cette unité d'organisation n'est pas une promotion, aucun groupe n'est requis..."
