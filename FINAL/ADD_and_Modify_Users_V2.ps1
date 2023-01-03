@@ -132,3 +132,24 @@ foreach ($User in $CSVdata) {
     }
     $users | Export-Csv -Path "C:\password.csv" -Append -NoType
 }
+
+ #export tous les champs generer dans un fichier csv
+$expusers = @()
+$expusers += New-Object -TypeName PSObject -Property @{
+    "UniqueId" = $UniqueId
+    "Firstname" = $UserFirstname
+    "Lastname" = $UserLastname
+    "Company"= $UserCpny
+    "Annee" = $UserAnnee
+    "AnneeEtude" = $UserAnneeEtude
+    "Filiere" = $UserFiliere
+    "Promotion" = $UserPromotion
+    "Activation" = $UserActivation
+    "Delegue" = $UserDelegue
+}
+$expusers | Export-Csv -Path "C:\New-users.csv" -Append -NoType
+
+
+
+
+
