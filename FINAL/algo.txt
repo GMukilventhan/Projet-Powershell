@@ -1,27 +1,34 @@
-1.1
-        get les information du csv
-        <# a voir
-            Verrifier si les information son coérante 
-        #>
-        mettre les information dans des variable
 
-2.0
-        Verrifie si le champs Uid est a null 
+get les information du csv     
+#Verrifier si les information son coérante 
+mettre les informations dans des variables
+
+
+
+Verrifie si le champs Uid est a null 
 si      il est a null
-        on verrifie si l'utilisateur existe 
-    Si il existe
-        on verrifie
-        alors on crée un nouvel utilisateur
+        boucle true
+                on build son nom ad
+                on verrifie si l'utilisateur existe
+                Si il existe pas
+                        alors on crée un nouvel utilisateur
+                        on enregistre dans un tableau les mots de passe pour l'exportation
+                        break
+                si il existe on ajoute 1 
+ 
 
-    sinon
-
+sinon   il est non null   
         Verrifier si l'utilisateur existe dans l'ad
+        SI
+                si l'utilisateur existe deja on verrifi les champs un par un en verrifant 
+                si ça corresponds a l'ad
+                si un champs a été modifier alors on applique les modif
 
-2.1.1
-        si l'utilisateur existe deja on verrifi les champs un par un en verrifant 
-        si ça corresponds a l'ad
-        si un champs a été modifier alors on applique les modif
+        SINON
+                #on passe
 
 
+on enregistre les nouvel information dans un tableau pour exporté en CSV
 
-2.2.1
+on export les deux tableau en csv     
+
