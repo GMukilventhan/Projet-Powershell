@@ -37,6 +37,7 @@ foreach ($User in $CSVdata) {
 
     $UserActivation = $User.Activation
 
+
     $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
@@ -95,6 +96,24 @@ foreach ($User in $CSVdata) {
             $InfoADLastname = $User.sn
             #$InfoADTitle = $user.Title
             $InfoADUserActivation = $user.Enabled
+            $InfoADUserDelegue = $user.Title 
+
+            if ($InfoAdUserDelegue -eq "Etudiant" ) 
+            {
+                $DelegueAD = $False
+            }else {
+                $DelegueAD = $True
+            }
+            
+
+            if ($DelegueAD -ne $DelegueCSV ) {
+                try {
+                    Set-ADUser -Identity $UniqueId -Title $DelegueCSV
+                    Write-Success -Message "Modification du statut de l'utilisateur :" -Commentaire $UserDisplay
+                }catch {
+                    Write-Warning -Message "Modification du statut de l'utilisateur impossible:" -Commentaire $UserDisplay
+                }
+            }
 
             if ($InfoADFirstname -ne $UserFirstname) {
                 try {
