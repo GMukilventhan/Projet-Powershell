@@ -89,6 +89,37 @@ foreach ($User in $CSVdata) {
             #
             # GET info AD
             # if infoAD pas= INFOCSV si oui #a modifier infoCSV > infoAD
+
+            # Vérifie si l'utilisateur existe
+            $InfoADFirstname = $user.givenName
+            $InfoADLastname = $User.sn
+            #$InfoADTitle = $user.Title
+            $InfoADUserActivation = $user.Enabled
+
+            if ($InfoADFirstname -ne $UserFirstname) {
+                try {
+                    Set-ADUser -Identity $UniqueId -GivenName $UserFirstname
+                    Write-Success -Message "Modification du prénom de l'utilisateur :" -Commentaire $UserDisplay
+                }catch {
+                    Write-Warning -Message "Modification du prénom de l'utilisateur impossible:" -Commentaire $UserDisplay
+                }
+            }
+            if ($InfoADLastname -ne $UserLastname) {
+                try {
+                    Set-ADUser -Identity $UniqueId -Surname $UserLastname
+                    Write-Success -Message "Modification du nom de l'utilisateur :" -Commentaire $UserDisplay
+                }catch {
+                    Write-Warning -Message "Modification du nom de l'utilisateur impossible:" -Commentaire $UserDisplay
+                }
+            }
+            if ($InfoADUserActivation -ne $UserActivation) {
+                try {
+                    Set-ADUser -Identity $UniqueId -Enabled $UserActivation
+                    Write-Success -Message "Modification de l'activation de l'utilisateur :" -Commentaire $UserDisplay
+                }catch {
+                    Write-Warning -Message "Modification de l'activation de l'utilisateur impossible:" -Commentaire $UserDisplay
+                }
+            }
         }else{
             echo "error"
         }
