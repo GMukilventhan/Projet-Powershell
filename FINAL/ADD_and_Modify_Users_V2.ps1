@@ -17,7 +17,7 @@ foreach ($User in $CSVdata) {
     $UserSAM = $User.SAM
     $UserFirstname = $User.Firstname
     $UserLastname = $User.Lastname.ToUpper()
-    $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
+    $UserDisplay = $UserFirstname + "_" + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
     $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 8 | %{[char]$_})
     $SAM = $UserFirstnameLastname + "@biodevops.local"
@@ -46,21 +46,24 @@ foreach ($User in $CSVdata) {
     $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
-
+    
     if ($UserSAM -eq "Null"){            
-       
         $i = 1
-
         $testuser = test-userexists -Identity $UserDisplay
-
+        $OriginalUserFirstnameLastname = $UserFirstnameLastname
+        $OriginalUserDisplay = $UserDisplay
+  
         while ($testuser -eq $True) {
-            $UserFirstnameLastname = $UserFirstnameLastname + $i
+   
+            $UserFirstnameLastname = $OriginalUserFirstnameLastname + $i
             $SAM = $UserFirstnameLastname + "@biodevops.local"
             $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
-            $UserDisplay = $UserDisplay + $i
+            
+            $UserDisplay = $OriginalUserDisplay + $i
             $testuser = test-userexists -Identity $UserDisplay
             $i++
         }
+   
         try {
             New-ADUser `
             -Name $UserDisplay `
@@ -91,12 +94,12 @@ foreach ($User in $CSVdata) {
         }
 
 
-        #try {
-        #    Add-ADGroupMember -Identity $GroSAMameSecurity -Members $UserFirstnameLastname
-        #    Add-ADGroupMember -Identity $GroSAMameDistribution -Members $GroSAMameSecurity
-        #}catch {
-        #   Write-Warning -Message "error" -Commentaire "error"
-        #}
+        try {
+            Add-ADGroupMember -Identity $GroSAMameSecurity -Members $UserFirstnameLastname
+            Add-ADGroupMember -Identity $GroSAMameDistribution -Members $GroSAMameSecurity
+        }catch {
+           Write-Warning -Message "error" -Commentaire "error"
+        }
 
     }else {
         $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}

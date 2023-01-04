@@ -47,7 +47,7 @@ function Write-Warning {
         [string]$Message,
         [string]$Commentaire
     )
-    Write-Host "-Type Warning -Message $Message -Commentaire $Commentaire" -ForegroundColor Blue
+    Write-Host "-Type Warning -Message $Message -Commentaire $Commentaire" -ForegroundColor Gray
     Write-Logs -Type "Warning" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 function Write-Success {
@@ -98,15 +98,18 @@ function test-userexists {
             param(
                 $Identity
             )
-            try{
-                Get-ADUser -Identity $Identity
-                return $True
-            }catch{
-                return $False
-            }
+            $result = Get-ADUser -Filter {Name -eq $Identity}
+            if ($result) {
+            return $True 
+             } else {
+              return $False
+              }
+            
         }
 
 
+     
+           
 
 
 
