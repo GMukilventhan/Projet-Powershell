@@ -50,16 +50,17 @@ foreach ($User in $CSVdata) {
     if ($UserSAM -eq "Null"){            
        
         $i = 1
-        echo "1"
 
+        $testuser = test-userexists -Identity $UserDisplay
 
-        while (test-userexists -Identity $UniqueId) {
-            echo "2"
+        while ($testuser -eq $True) {
+            test-userexists -Identity $UserDisplay
             $UserFirstnameLastname = $UserFirstnameLastname + $i
             $SAM = $UserFirstnameLastname + "@biodevops.local"
             $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
             $i++
             $UserDisplay = $UserDisplay + $i
+            $testuser = test-userexists -Identity $UserDisplay
         }
         try {
             New-ADUser `
