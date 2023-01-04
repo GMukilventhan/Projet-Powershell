@@ -83,24 +83,16 @@ function New-OufromCsv {
         $OUpath = $OU.path
 
         try {        
-            if (test-OUexist){
                 New-ADOrganizationalUnit -Name $OUname -Path $OUpath
                 Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath"
-            }else{
-                Write-Info -Message "existe deja $OUname" -Commentaire "$OUname $OUpath"
-            }
         }catch {
-            Write-Success -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
+            if ($_.Exception.ErrorCode -eq "8335") {
+                Write-Error -Message "L'unité organisationnelle existe déjà. Veuillez spécifier un nom différent ou supprimer l'objet existant."-Commentaire "$OUname $OUpath"
+            }
+            Write-Error -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
         }
     }
 }
-
-
-
-
-
-
-
 
 
 
