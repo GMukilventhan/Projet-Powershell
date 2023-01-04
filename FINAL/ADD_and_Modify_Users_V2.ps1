@@ -17,7 +17,7 @@ foreach ($User in $CSVdata) {
     $UserSAM = $User.SAM
     $UserFirstname = $User.Firstname
     $UserLastname = $User.Lastname.ToUpper()
-    $UserDisplay = $UserFirstname + "_" + $UserLastname.ToUpper()
+    $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
     $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 10 | %{[char]$_})
     $SAM = $UserFirstnameLastname + "@biodevops.local"
@@ -29,17 +29,24 @@ foreach ($User in $CSVdata) {
     $UserFiliere = $User.Filiere
     $UserPromotion = $User.Promotion
     $UserClasse = $UserAnnee + "_" + $UserPromotion
-    $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
+    $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=labvmware,DC=local"
     $GrpSAMameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
     $GrpSAMameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
     $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
-    $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
+    $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=labvmware,DC=local"
 
     $UserActivation = $User.Activation
     if ($UserActivation -eq "true"){
         $UserActivation = $True
     }elseif($UserActivation -eq "false"){
         $UserActivation = $False
+    }
+
+    $UserDelegue = $User.Delegue
+    if ($UserDelegue -eq "true"){
+        $UserDelegue = $True
+    }elseif($UserrDelegue -eq "false"){
+        $UserrDelegue = $False
     }
 
 
@@ -102,6 +109,7 @@ foreach ($User in $CSVdata) {
         }
 
     }else {
+        # TODO: Test UserExist
         $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
         if ($UserExists) {
             $InfoADFirstname = $user.givenName
@@ -110,11 +118,21 @@ foreach ($User in $CSVdata) {
             $InfoADUserActivation = $user.Enabled
             $InfoADUserDelegue = $user.Title 
 
-            if ($InfoAdUserDelegue -eq "Etudiant" ) 
-            {
-                $DelegueAD = $False
-            }else {
-                $DelegueAD = $True
+            if($UserDelegue -eq $True){
+                $DelegueMemberOf = Get-ADPrincipalGroupMembership $UniqueId | Where-Object {$_.name -like "Grp_Securite_*"}
+                # Récupérer le nom de l'utilisateur et son SAMaccountName
+                $AllMembersGroup = Get-ADGroupMember -Identity $DelegueMemberOf.Name
+                foreach ($MemberGroup in $AllMembersGroup) {
+                    If($MemberGroup.SamAccountName -ne $UserSAM){
+                        # Ajouter le le nom du délégué en tant que manager pour les autres membres de son groupe
+                        Set-ADUser -Identity $MemberGroup -Manager $UserSAM
+                    }Else{
+                        # Changer le champs Title actuellement Etudiant par Delegue
+                        Set-ADUser -Identity $UserSam -Title "Delegue"
+                    }
+                  
+                }
+
             }
             
 
