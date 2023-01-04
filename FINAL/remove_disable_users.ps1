@@ -12,6 +12,7 @@ foreach ($user in $users) {
         $timeSinceDisable = New-TimeSpan -Start $disableDate -End (Get-Date)
     if ($timeSinceDisable.Days -gt 30) {
         Remove-ADUser -Identity $user
+        Write-Success -Message "l'utilisateur a été supprimé:" -Commentaire $user
     }
     }
 }
