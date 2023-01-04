@@ -70,6 +70,16 @@ foreach ($User in $CSVdata) {
             -Enabled $UserActivation
 
             Write-Success -Message "création de l'utilisateur :" -Commentaire $UserDisplay
+
+            $users = @()
+            $users += New-Object -TypeName PSObject -Property @{
+                "Username" = $UserDisplay
+                "Password" = $password
+            }
+
+            $CSVPASSWORD = "C:\password.csv"
+            $users | Export-Csv -Path $CSVPASSWORD -Append -NoType
+
         }catch {
             Write-Warning -Message "création de l'utilisateur impossible:" -Commentaire $UserDisplay
         }
@@ -144,31 +154,22 @@ foreach ($User in $CSVdata) {
         }
     }
 
-    $users = @()
-    $users += New-Object -TypeName PSObject -Property @{
-        "Username" = $UserFirstnameLastname
-        "Password" = $password
+
+
+    #export tous les champs generer dans un fichier csv
+    $expusers = @()
+    $expusers += New-Object -TypeName PSObject -Property @{
+        "UniqueId" = $UniqueId
+        "Firstname" = $UserFirstname
+        "Lastname" = $UserLastname
+        "Company"= $UserCpny
+        "Annee" = $UserAnnee
+        "AnneeEtude" = $UserAnneeEtude
+        "Filiere" = $UserFiliere
+        "Promotion" = $UserPromotion
+        "Activation" = $UserActivation
+        "Delegue" = $UserDelegue
     }
-    $users | Export-Csv -Path "C:\password.csv" -Append -NoType
+    $expusers | Export-Csv -Path "C:\New-users.csv" -Append -NoType
+
 }
-
- #export tous les champs generer dans un fichier csv
-$expusers = @()
-$expusers += New-Object -TypeName PSObject -Property @{
-    "UniqueId" = $UniqueId
-    "Firstname" = $UserFirstname
-    "Lastname" = $UserLastname
-    "Company"= $UserCpny
-    "Annee" = $UserAnnee
-    "AnneeEtude" = $UserAnneeEtude
-    "Filiere" = $UserFiliere
-    "Promotion" = $UserPromotion
-    "Activation" = $UserActivation
-    "Delegue" = $UserDelegue
-}
-$expusers | Export-Csv -Path "C:\New-users.csv" -Append -NoType
-
-
-
-
-
