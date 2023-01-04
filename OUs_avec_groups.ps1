@@ -31,6 +31,8 @@ If(($OUsecurityGroup -eq "true") -and ($OUdistributionGroup -eq "true"))
 
   New-ADGroup -Name $DistributionGroupName -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
   Write-Host "Création du groupe de distribution « $DistributionGroupName » pour la promotion « $OUname » associé à l'e-mail « $GroupDistributionEmail »"
+  Add-ADGroupMember -Identity $DistributionGroupName -Members $SecurityGroupName
+  Write-Host "Le groupe de sécurité « $SecurityGroupName » devient membre du groupe de distribution « $DistributionGroupName »"
 
 }
 
