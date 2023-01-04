@@ -60,19 +60,6 @@ function Write-Success {
     Write-Logs -Type "Success" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 
-function test-OUexist {
-    param (
-        $OUname
-    )
-
-    $ou = Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$ouName'"
-    if ($ou) {
-        return $true
-    }else{
-        return $false
-    }
-}
-
 function New-OufromCsv {
     param (
         $CSVpath
@@ -86,9 +73,6 @@ function New-OufromCsv {
                 New-ADOrganizationalUnit -Name $OUname -Path $OUpath
                 Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath"
         }catch {
-            if ($_.Exception.ErrorCode -eq "8335") {
-                Write-Error -Message "L'unité organisationnelle existe déjà. Veuillez spécifier un nom différent ou supprimer l'objet existant."-Commentaire "$OUname $OUpath"
-            }
             Write-Error -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
         }
     }
