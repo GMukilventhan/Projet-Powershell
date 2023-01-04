@@ -47,7 +47,7 @@ function Write-Warning {
         [string]$Message,
         [string]$Commentaire
     )
-    Write-Host "-Type Warning -Message $Message -Commentaire $Commentaire" -ForegroundColor Red
+    Write-Host "-Type Warning -Message $Message -Commentaire $Commentaire" -ForegroundColor Blue
     Write-Logs -Type "Warning" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 function Write-Success {
@@ -58,6 +58,19 @@ function Write-Success {
     )
     Write-Host "-Type Success -Message $Message -Commentaire $Commentaire" -ForegroundColor Green
     Write-Logs -Type "Success" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
+}
+
+function test-OUexist {
+    param (
+        $OUname
+    )
+
+    $ou = Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$ouName'"
+    if ($ou) {
+        return $true
+    }else{
+        return $false
+    }
 }
 
 function New-OufromCsv {
@@ -73,7 +86,7 @@ function New-OufromCsv {
                 New-ADOrganizationalUnit -Name $OUname -Path $OUpath
                 Write-Success -Message "Nouvelle OU $OUname" -Commentaire "$OUname $OUpath"
         }catch {
-            Write-Error -Message "erreur lors de la création de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
+            Write-Error -Message "erreur lors de la creation de $OUname $($_.Exception.GetType())" -Commentaire "$OUname $OUpath"
         }
     }
 }
@@ -81,7 +94,17 @@ function New-OufromCsv {
 
 
 
-
+function test-userexists {
+            param(
+                $Identity
+            )
+            try{
+                Get-ADUser -Identity $Identity
+                return $True
+            }catch{
+                return $False
+            }
+        }
 
 
 
@@ -109,7 +132,7 @@ function add-Groups-distrib-securityFromOUs
     # liste des UO et sous-UO sous la racine
     $ous = Get-ADOrganizationalUnit -Filter * -SearchBase $RootOU
 
-    # Pour chaque UO ou sous-UO cr�e un groupe de s�curit� ou un groupe de distribution
+    # Pour chaque UO ou sous-UO crï¿½e un groupe de sï¿½curitï¿½ ou un groupe de distribution
     foreach ($ou in $ous){
         $groupName = $ou.Name
         if ($GroupType -eq "Security"){
@@ -137,13 +160,13 @@ function add-Groups-distrib-securityFromOUs
 
 
 <#
-Lors de chaque élection du délégué de la promotion, 
-l’ensemble des comptes des élèves sont mis à jour afin de modifier la valeur « manager » 
-des élèves avec la valeur du DistinguishedName du compte de l’élève promu en tant que délégué.
+Lors de chaque Ã©lection du dÃ©lÃ©guÃ© de la promotion, 
+lâ€™ensemble des comptes des Ã©lÃ¨ves sont mis Ã  jour afin de modifier la valeur Â« manager Â» 
+des Ã©lÃ¨ves avec la valeur du DistinguishedName du compte de lâ€™Ã©lÃ¨ve promu en tant que dÃ©lÃ©guÃ©.
 
-objectif recupéré le nom du délégué puis son ou
+objectif recupÃ©rÃ© le nom du dÃ©lÃ©guÃ© puis son ou
 lister les nombre utilisateur de l'ou sans lui meme
-puis ajouter le nom du délégué dans la variable manager
+puis ajouter le nom du dÃ©lÃ©guÃ© dans la variable manager
 
 #>
 function set-newdelege {

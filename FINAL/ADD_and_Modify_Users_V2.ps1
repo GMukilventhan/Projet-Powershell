@@ -8,19 +8,19 @@ $global:filelogs = "Logs/Modif.json"
 # TODO EXPORT CSV END SCRIPT PLUS TARD 
 
 
-# Importe les donnÃ©es du fichier CSV
+# Importe les donnÃƒÂ©es du fichier CSV
 $CSVpath = "CSV/user.csv"
 $CSVdata = Import-CSV -Path $CSVpath -Delimiter ";" -Encoding Default
 
 # Pour chaque ligne du fichier CSV
 foreach ($User in $CSVdata) {
-    $UserUPN = $User.UPN
+    $UserSAM = $User.SAM
     $UserFirstname = $User.Firstname
     $UserLastname = $User.Lastname.ToUpper()
     $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
     $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 8 | %{[char]$_})
-    $UPN = $UserFirstnameLastname + "@biodevops.local"
+    $SAM = $UserFirstnameLastname + "@biodevops.local"
     $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
     $UserTitle = "Etudiant"
     $UserCpny = $User.Company
@@ -30,49 +30,34 @@ foreach ($User in $CSVdata) {
     $UserPromotion = $User.Promotion
     $UserClasse = $UserAnnee + "_" + $UserPromotion
     $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
-    $GroupNameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
-    $GroupNameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
+    $GroSAMameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
+    $GroSAMameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
     $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
     $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
 
     $UserActivation = $User.Activation
     if ($UserActivation -eq "true"){
-
         $UserActivation = $True
-
     }elseif($UserActivation -eq "false"){
-
         $UserActivation = $False
-
     }
 
-    #export tous les champs generer dans un fichier csv
-    $expusers = @()
-    $expusers += New-Object -TypeName PSObject -Property @{
-    "UniqueId" = $UniqueId
-    "Firstname" = $UserFirstname
-    "Lastname" = $UserLastname
-    "Company"= $UserCpny
-    "Annee" = $UserAnnee
-    "AnneeEtude" = $UserAnneeEtude
-    "Filiere" = $UserFiliere
-    "Promotion" = $UserPromotion
-    "Activation" = $UserActivation
-    "Delegue" = $UserDelegue
-    }
-    $expusers | Export-Csv -Path "C:\New-users.csv" -Append -NoType
 
     $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
-    if ($UserUPN -eq "Null"){            
-        $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
+
+    if ($UserSAM -eq "Null"){            
+       
         $i = 1
-        while ($UserExists) {
+        echo "1"
+
+
+        while (test-userexists -Identity $UniqueId) {
+            echo "2"
             $UserFirstnameLastname = $UserFirstnameLastname + $i
-            $UPN = $UserFirstnameLastname + "@biodevops.local"
+            $SAM = $UserFirstnameLastname + "@biodevops.local"
             $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
-            $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
             $i++
             $UserDisplay = $UserDisplay + $i
         }
@@ -83,7 +68,7 @@ foreach ($User in $CSVdata) {
             -Surname $UserLastname `
             -DisplayName $UserDisplay `
             -SamAccountName $UniqueId `
-            -UserPrincipalName $UPN `
+            -UserPrincipalName $SAM `
             -EmailAddress $UserEmail `
             -Title $UserTitle `
             -Department $UserClasse `
@@ -93,7 +78,7 @@ foreach ($User in $CSVdata) {
             -ChangePasswordAtLogon $True `
             -Enabled $UserActivation
 
-            Write-Success -Message "crÃ©ation de l'utilisateur :" -Commentaire $UserDisplay
+            Write-Success -Message "crÃƒÂ©ation de l'utilisateur :" -Commentaire $UserDisplay
             $users = @()
             $users += New-Object -TypeName PSObject -Property @{
             "Username" = $UserFirstnameLastname
@@ -102,13 +87,13 @@ foreach ($User in $CSVdata) {
             $users | Export-Csv -Path "C:\password.csv" -Append -NoType
         }catch {
             $_
-            Write-Warning -Message "crÃ©ation de l'utilisateur impossible:" -Commentaire $UserDisplay
+            Write-Warning -Message "crÃƒÂ©ation de l'utilisateur impossible:" -Commentaire $UserDisplay
         }
 
 
         #try {
-        #    Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
-        #    Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
+        #    Add-ADGroupMember -Identity $GroSAMameSecurity -Members $UserFirstnameLastname
+        #    Add-ADGroupMember -Identity $GroSAMameDistribution -Members $GroSAMameSecurity
         #}catch {
         #   Write-Warning -Message "error" -Commentaire "error"
         #}
@@ -143,10 +128,10 @@ foreach ($User in $CSVdata) {
             if ($InfoADFirstname -ne $UserFirstname) {
                 try {
                     Set-ADUser -Identity $UniqueId -GivenName $UserFirstname
-                    Write-Success -Message "Modification du prÃ©nom de l'utilisateur :" -Commentaire $UserDisplay
+                    Write-Success -Message "Modification du prÃƒÂ©nom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
                     $_
-                    Write-Warning -Message "Modification du prÃ©nom de l'utilisateur impossible:" -Commentaire $UserDisplay
+                    Write-Warning -Message "Modification du prÃƒÂ©nom de l'utilisateur impossible:" -Commentaire $UserDisplay
                 }
             }
             if ($InfoADLastname -ne $UserLastname) {
@@ -177,5 +162,22 @@ foreach ($User in $CSVdata) {
 
 
 
+<#
 
+    #export tous les champs generer dans un fichier csv
+    $expusers = @()
+    $expusers += New-Object -TypeName PSObject -Property @{
+    "UniqueId" = $UniqueId
+    "Firstname" = $UserFirstname
+    "Lastname" = $UserLastname
+    "Company"= $UserCpny
+    "Annee" = $UserAnnee
+    "AnneeEtude" = $UserAnneeEtude
+    "Filiere" = $UserFiliere
+    "Promotion" = $UserPromotion
+    "Activation" = $UserActivation
+    "Delegue" = $UserDelegue
+    }
+    $expusers | Export-Csv -Path "C:\New-users.csv" -Append -NoType
 
+#>
