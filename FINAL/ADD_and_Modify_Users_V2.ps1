@@ -57,9 +57,9 @@ foreach ($User in $CSVdata) {
             $UserFirstnameLastname = $UserFirstnameLastname + $i
             $SAM = $UserFirstnameLastname + "@biodevops.local"
             $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
-            $i++
             $UserDisplay = $UserDisplay + $i
             $testuser = test-userexists -Identity $UserDisplay
+            $i++
         }
         try {
             New-ADUser `
