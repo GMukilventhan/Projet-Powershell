@@ -19,7 +19,7 @@ foreach ($User in $CSVdata) {
     $UserLastname = $User.Lastname.ToUpper()
     $UserDisplay = $UserFirstname + "_" + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
-    $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 8 | %{[char]$_})
+    $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 10 | %{[char]$_})
     $SAM = $UserFirstnameLastname + "@biodevops.local"
     $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
     $UserTitle = "Etudiant"
@@ -159,18 +159,10 @@ foreach ($User in $CSVdata) {
             echo "error"
         }
     }
-
-}
-
-
-
-
-<#
-
     #export tous les champs generer dans un fichier csv
     $expusers = @()
-    $expusers += New-Object -TypeName PSObject -Property @{
-    "UniqueId" = $UniqueId
+    $expusers += New-Object -TypeName PSObject -Property @{ 
+    "UniqueId" = $UniqueId  
     "Firstname" = $UserFirstname
     "Lastname" = $UserLastname
     "Company"= $UserCpny
@@ -181,6 +173,12 @@ foreach ($User in $CSVdata) {
     "Activation" = $UserActivation
     "Delegue" = $UserDelegue
     }
-    $expusers | Export-Csv -Path "C:\New-users.csv" -Append -NoType
 
-#>
+    #$expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Append -NoTypeInformation 
+    #$expusers | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Force -Append -NoTypeInformation
+    #$expusers | ConvertTo-Csv -Delimiter ';' -NoTypeInformation | % {$_.Replace('"','')} | Export-Csv "C:\New-users.csv" -Append 
+    #$expusers| Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -NoTypeInformation -UseCulture -NoQuoteChar
+    $expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -UseCulture -Append -NoTypeInformation
+
+}
+
