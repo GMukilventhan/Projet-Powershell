@@ -176,9 +176,9 @@ foreach ($User in $CSVdata) {
 
     #$expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Append -NoTypeInformation 
     #$expusers | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Force -Append -NoTypeInformation
-    #$expusers | ConvertTo-Csv -Delimiter ';' -NoTypeInformation | % {$_.Replace('"','')} | Export-Csv "C:\New-users.csv" -Append 
+    $expusers | ConvertTo-Csv -Delimiter ';' -NoTypeInformation | % {$_.Replace('"','')} | Out-File "C:\New-users.csv" -Append -NoNewline
     #$expusers| Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -NoTypeInformation -UseCulture -NoQuoteChar
-    $expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -UseCulture -Append -NoTypeInformation
+    #$expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -UseCulture -Append -NoTypeInformation
 
 }
 
