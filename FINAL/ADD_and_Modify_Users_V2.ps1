@@ -54,7 +54,6 @@ foreach ($User in $CSVdata) {
         $testuser = test-userexists -Identity $UserDisplay
 
         while ($testuser -eq $True) {
-            test-userexists -Identity $UserDisplay
             $UserFirstnameLastname = $UserFirstnameLastname + $i
             $SAM = $UserFirstnameLastname + "@biodevops.local"
             $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
