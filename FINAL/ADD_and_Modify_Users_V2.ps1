@@ -36,6 +36,15 @@ foreach ($User in $CSVdata) {
     $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
 
     $UserActivation = $User.Activation
+    if ($UserActivation -eq "true"){
+
+        $UserActivation = $True
+
+    }elseif($UserActivation -eq "false"){
+
+        $UserActivation = $False
+
+    }
 
 
     $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
@@ -71,6 +80,7 @@ foreach ($User in $CSVdata) {
 
             Write-Success -Message "création de l'utilisateur :" -Commentaire $UserDisplay
         }catch {
+            $_
             Write-Warning -Message "création de l'utilisateur impossible:" -Commentaire $UserDisplay
         }
 

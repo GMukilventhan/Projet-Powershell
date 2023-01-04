@@ -47,7 +47,7 @@ function Write-Warning {
         [string]$Message,
         [string]$Commentaire
     )
-    Write-Host "-Type Warning -Message $Message -Commentaire $Commentaire" -ForegroundColor Orange
+    Write-Host "-Type Warning -Message $Message -Commentaire $Commentaire" -ForegroundColor Red
     Write-Logs -Type "Warning" -Message $Message -Commentaire $Commentaire -FilePath $global:filelogs
 }
 function Write-Success {
