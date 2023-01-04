@@ -30,8 +30,8 @@ foreach ($User in $CSVdata) {
     $UserPromotion = $User.Promotion
     $UserClasse = $UserAnnee + "_" + $UserPromotion
     $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
-    $GroSAMameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
-    $GroSAMameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
+    $GrpSAMameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
+    $GrpSAMameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
     $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
     $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
 
@@ -95,8 +95,8 @@ foreach ($User in $CSVdata) {
 
 
         try {
-            Add-ADGroupMember -Identity $GroSAMameSecurity -Members $UserFirstnameLastname
-            Add-ADGroupMember -Identity $GroSAMameDistribution -Members $GroSAMameSecurity
+            Add-ADPrincipalGroupMembership -Identity $uniqueId -MemberOf $GrpSAMameSecurity
+
         }catch {
            Write-Warning -Message "error" -Commentaire "error"
         }
