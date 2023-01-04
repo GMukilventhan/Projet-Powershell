@@ -33,8 +33,5 @@ If(($OUsecurityGroup -eq "true") -and ($OUdistributionGroup -eq "true"))
   Write-Host "Création du groupe de distribution « $DistributionGroupName » pour la promotion « $OUname » associé à l'e-mail « $GroupDistributionEmail »"
 
 }
-Else{
-  Write-Host "Cette unité d'organisation n'est pas une promotion, aucun groupe n'est requis..."
-}
 
 }
