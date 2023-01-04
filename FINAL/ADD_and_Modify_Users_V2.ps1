@@ -17,7 +17,7 @@ foreach ($User in $CSVdata) {
     $UserSAM = $User.SAM
     $UserFirstname = $User.Firstname
     $UserLastname = $User.Lastname.ToUpper()
-    $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
+    $UserDisplay = $UserFirstname + "_" + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
     $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 8 | %{[char]$_})
     $SAM = $UserFirstnameLastname + "@biodevops.local"
@@ -30,8 +30,8 @@ foreach ($User in $CSVdata) {
     $UserPromotion = $User.Promotion
     $UserClasse = $UserAnnee + "_" + $UserPromotion
     $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
-    $GroSAMameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
-    $GroSAMameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
+    $GrpSAMameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
+    $GrpSAMameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
     $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
     $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
 
@@ -46,21 +46,24 @@ foreach ($User in $CSVdata) {
     $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
 
-
+    
     if ($UserSAM -eq "Null"){            
-       
         $i = 1
-        echo "1"
-
-
-        while (test-userexists -Identity $UniqueId) {
-            echo "2"
-            $UserFirstnameLastname = $UserFirstnameLastname + $i
+        $testuser = test-userexists -Identity $UserDisplay
+        $OriginalUserFirstnameLastname = $UserFirstnameLastname
+        $OriginalUserDisplay = $UserDisplay
+  
+        while ($testuser -eq $True) {
+   
+            $UserFirstnameLastname = $OriginalUserFirstnameLastname + $i
             $SAM = $UserFirstnameLastname + "@biodevops.local"
             $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
+            
+            $UserDisplay = $OriginalUserDisplay + $i
+            $testuser = test-userexists -Identity $UserDisplay
             $i++
-            $UserDisplay = $UserDisplay + $i
         }
+   
         try {
             New-ADUser `
             -Name $UserDisplay `
@@ -91,12 +94,12 @@ foreach ($User in $CSVdata) {
         }
 
 
-        #try {
-        #    Add-ADGroupMember -Identity $GroSAMameSecurity -Members $UserFirstnameLastname
-        #    Add-ADGroupMember -Identity $GroSAMameDistribution -Members $GroSAMameSecurity
-        #}catch {
-        #   Write-Warning -Message "error" -Commentaire "error"
-        #}
+        try {
+            Add-ADPrincipalGroupMembership -Identity $uniqueId -MemberOf $GrpSAMameSecurity
+
+        }catch {
+           Write-Warning -Message "error" -Commentaire "error"
+        }
 
     }else {
         $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
