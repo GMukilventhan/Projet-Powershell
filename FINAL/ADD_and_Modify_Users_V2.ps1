@@ -8,7 +8,7 @@ $global:filelogs = "Logs/Modif.json"
 # TODO EXPORT CSV END SCRIPT PLUS TARD 
 
 
-# Importe les données du fichier CSV
+# Importe les donnÃ©es du fichier CSV
 $CSVpath = "CSV/user.csv"
 $CSVdata = Import-CSV -Path $CSVpath -Delimiter ";" -Encoding Default
 
@@ -46,6 +46,21 @@ foreach ($User in $CSVdata) {
 
     }
 
+    #export tous les champs generer dans un fichier csv
+    $expusers = @()
+    $expusers += New-Object -TypeName PSObject -Property @{
+    "UniqueId" = $UniqueId
+    "Firstname" = $UserFirstname
+    "Lastname" = $UserLastname
+    "Company"= $UserCpny
+    "Annee" = $UserAnnee
+    "AnneeEtude" = $UserAnneeEtude
+    "Filiere" = $UserFiliere
+    "Promotion" = $UserPromotion
+    "Activation" = $UserActivation
+    "Delegue" = $UserDelegue
+    }
+    $expusers | Export-Csv -Path "C:\New-users.csv" -Append -NoType
 
     $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
     $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
@@ -78,40 +93,29 @@ foreach ($User in $CSVdata) {
             -ChangePasswordAtLogon $True `
             -Enabled $UserActivation
 
-            Write-Success -Message "création de l'utilisateur :" -Commentaire $UserDisplay
-
+            Write-Success -Message "crÃ©ation de l'utilisateur :" -Commentaire $UserDisplay
             $users = @()
             $users += New-Object -TypeName PSObject -Property @{
-                "Username" = $UserDisplay
-                "Password" = $password
+            "Username" = $UserFirstnameLastname
+            "Password" = $password
             }
-
-            $CSVPASSWORD = "C:\password.csv"
-            $users | Export-Csv -Path $CSVPASSWORD -Append -NoType
-
+            $users | Export-Csv -Path "C:\password.csv" -Append -NoType
         }catch {
             $_
-            Write-Warning -Message "création de l'utilisateur impossible:" -Commentaire $UserDisplay
+            Write-Warning -Message "crÃ©ation de l'utilisateur impossible:" -Commentaire $UserDisplay
         }
 
 
-        try {
-            Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
-            Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
-        }catch {
-            Write-Warning -Message "error" -Commentaire "error"
-        }
+        #try {
+        #    Add-ADGroupMember -Identity $GroupNameSecurity -Members $UserFirstnameLastname
+        #    Add-ADGroupMember -Identity $GroupNameDistribution -Members $GroupNameSecurity
+        #}catch {
+        #   Write-Warning -Message "error" -Commentaire "error"
+        #}
 
     }else {
         $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
         if ($UserExists) {
-            # get les info de l'ad
-            # comparaison
-            #
-            # GET info AD
-            # if infoAD pas= INFOCSV si oui #a modifier infoCSV > infoAD
-
-            # Vérifie si l'utilisateur existe
             $InfoADFirstname = $user.givenName
             $InfoADLastname = $User.sn
             #$InfoADTitle = $user.Title
@@ -131,6 +135,7 @@ foreach ($User in $CSVdata) {
                     Set-ADUser -Identity $UniqueId -Title $DelegueCSV
                     Write-Success -Message "Modification du statut de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
+                    $_
                     Write-Warning -Message "Modification du statut de l'utilisateur impossible:" -Commentaire $UserDisplay
                 }
             }
@@ -138,9 +143,10 @@ foreach ($User in $CSVdata) {
             if ($InfoADFirstname -ne $UserFirstname) {
                 try {
                     Set-ADUser -Identity $UniqueId -GivenName $UserFirstname
-                    Write-Success -Message "Modification du prénom de l'utilisateur :" -Commentaire $UserDisplay
+                    Write-Success -Message "Modification du prÃ©nom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
-                    Write-Warning -Message "Modification du prénom de l'utilisateur impossible:" -Commentaire $UserDisplay
+                    $_
+                    Write-Warning -Message "Modification du prÃ©nom de l'utilisateur impossible:" -Commentaire $UserDisplay
                 }
             }
             if ($InfoADLastname -ne $UserLastname) {
@@ -148,6 +154,7 @@ foreach ($User in $CSVdata) {
                     Set-ADUser -Identity $UniqueId -Surname $UserLastname
                     Write-Success -Message "Modification du nom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
+                    $_
                     Write-Warning -Message "Modification du nom de l'utilisateur impossible:" -Commentaire $UserDisplay
                 }
             }
@@ -156,6 +163,7 @@ foreach ($User in $CSVdata) {
                     Set-ADUser -Identity $UniqueId -Enabled $UserActivation
                     Write-Success -Message "Modification de l'activation de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
+                    $_
                     Write-Warning -Message "Modification de l'activation de l'utilisateur impossible:" -Commentaire $UserDisplay
                 }
             }
@@ -164,22 +172,10 @@ foreach ($User in $CSVdata) {
         }
     }
 
-
-
-    #export tous les champs generer dans un fichier csv
-    $expusers = @()
-    $expusers += New-Object -TypeName PSObject -Property @{
-        "UniqueId" = $UniqueId
-        "Firstname" = $UserFirstname
-        "Lastname" = $UserLastname
-        "Company"= $UserCpny
-        "Annee" = $UserAnnee
-        "AnneeEtude" = $UserAnneeEtude
-        "Filiere" = $UserFiliere
-        "Promotion" = $UserPromotion
-        "Activation" = $UserActivation
-        "Delegue" = $UserDelegue
-    }
-    $expusers | Export-Csv -Path "C:\New-users.csv" -Append -NoType
-
 }
+
+
+
+
+
+
