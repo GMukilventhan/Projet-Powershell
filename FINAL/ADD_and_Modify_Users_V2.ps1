@@ -174,7 +174,7 @@ foreach ($User in $CSVdata) {
     #export tous les champs generer dans un fichier csv
     $expusers = @()
     $expusers += New-Object -TypeName PSObject -Property @{ 
-    "UniqueId" = $UniqueId  
+    "SAM" = $UniqueId   
     "Firstname" = $UserFirstname
     "Lastname" = $UserLastname
     "Company"= $UserCpny
