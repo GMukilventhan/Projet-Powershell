@@ -1,26 +1,24 @@
 $ErrorActionPreference = "Stop"
+#Import Module
 Import-Module ActiveDirectory
 Import-Module $PSScriptRoot/Module.psm1
 
+#action tracer sur LOG
 $global:filelogs = "Logs/Modif.json"
 
-
-# TODO EXPORT CSV END SCRIPT PLUS TARD 
-
-
-# Importe les donnÃƒÆ’Ã‚Â©es du fichier CSV
+# Importe les donnees du fichier CSV
 $CSVpath = "CSV/user.csv"
 $CSVdata = Import-CSV -Path $CSVpath -Delimiter ";" -Encoding Default
 
-# Pour chaque ligne du fichier CSV
+# Parcourir chaque ligne du fichier CSV
 foreach ($User in $CSVdata) {
     $UserSAM = $User.SAM
     $UserFirstname = $User.Firstname
     $UserLastname = $User.Lastname.ToUpper()
-    $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
+    $UserDisplay = $UserFirstname + "_" + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
     $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 10 | %{[char]$_})
-    $SAM = $UserFirstnameLastname + "@biodevops.local"
+    $UPN = $UserFirstnameLastname + "@biodevops.local"
     $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
     $UserTitle = "Etudiant"
     $UserCpny = $User.Company
@@ -29,11 +27,11 @@ foreach ($User in $CSVdata) {
     $UserFiliere = $User.Filiere
     $UserPromotion = $User.Promotion
     $UserClasse = $UserAnnee + "_" + $UserPromotion
-    $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=labvmware,DC=local"
+    $UserPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
     $GrpSAMameSecurity =  "Grp_Securite_" + $UserAnnee + "_" + $UserPromotion
     $GrpSAMameDistribution = "Grp_Distribution_" + $UserAnnee + "_" + $UserPromotion
     $GroupDistributionEmail = $UserPromotion + "." + $UserAnnee + "@biodevops.eu"
-    $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=labvmware,DC=local"
+    $GroupPath = "OU=$UserClasse,OU=$UserFiliere,OU=$UserAnneeEtude,OU=$UserAnnee,OU=ETUDIANTS,OU=BIODEVOPS,DC=mk,DC=lan"
 
     $UserActivation = $User.Activation
     if ($UserActivation -eq "true"){
@@ -50,24 +48,23 @@ foreach ($User in $CSVdata) {
     }
 
 
-    $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
-    $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)
-
     
-    if ($UserSAM -eq "Null"){            
+    if ($UserSAM -eq "Null"){  
+        $uniqueRandomNumbers = -join (0..9| Get-Random -Count 10)
+        $UniqueId = "U" + $UserAnnee + (-join $uniqueRandomNumbers)          
         $i = 1
-        $testuser = test-userexists -Identity $UserDisplay
+        $testuser = test-userexists -Identity $UserDisplay -Parameter "Name"
         $OriginalUserFirstnameLastname = $UserFirstnameLastname
         $OriginalUserDisplay = $UserDisplay
   
         while ($testuser -eq $True) {
    
             $UserFirstnameLastname = $OriginalUserFirstnameLastname + $i
-            $SAM = $UserFirstnameLastname + "@biodevops.local"
+            $UPN = $UserFirstnameLastname + "@biodevops.local"
             $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
             
             $UserDisplay = $OriginalUserDisplay + $i
-            $testuser = test-userexists -Identity $UserDisplay
+            $testuser = test-userexists -Identity $UserDisplay -Parameter "Name"
             $i++
         }
    
@@ -78,7 +75,7 @@ foreach ($User in $CSVdata) {
             -Surname $UserLastname `
             -DisplayName $UserDisplay `
             -SamAccountName $UniqueId `
-            -UserPrincipalName $SAM `
+            -UserPrincipalName $UPN `
             -EmailAddress $UserEmail `
             -Title $UserTitle `
             -Department $UserClasse `
@@ -91,7 +88,7 @@ foreach ($User in $CSVdata) {
             Write-Success -Message "crÃƒÆ’Ã‚Â©ation de l'utilisateur :" -Commentaire $UserDisplay
             $users = @()
             $users += New-Object -TypeName PSObject -Property @{
-            "Username" = $UserFirstnameLastname
+            "Identifiant" = $UPN
             "Password" = $password
             }
             $users | Export-Csv -Path "C:\password.csv" -Append -NoType
@@ -109,43 +106,28 @@ foreach ($User in $CSVdata) {
         }
 
     }else {
-        # TODO: Test UserExist
-        $UserExists = Get-ADUser -Filter {SamAccountName -eq $UniqueId}
-        if ($UserExists) {
+        $UniqueId = $UserSAM
+        if (test-userexists -Identity $UniqueId -Parameter "SamAccountName") {
             $InfoADFirstname = $user.givenName
             $InfoADLastname = $User.sn
-            #$InfoADTitle = $user.Title
             $InfoADUserActivation = $user.Enabled
             $InfoADUserDelegue = $user.Title 
-
+            
             if($UserDelegue -eq $True){
                 $DelegueMemberOf = Get-ADPrincipalGroupMembership $UniqueId | Where-Object {$_.name -like "Grp_Securite_*"}
-                # Récupérer le nom de l'utilisateur et son SAMaccountName
+                # Rï¿½cupï¿½rer le nom de l'utilisateur et son SAMaccountName
                 $AllMembersGroup = Get-ADGroupMember -Identity $DelegueMemberOf.Name
+ 
                 foreach ($MemberGroup in $AllMembersGroup) {
                     If($MemberGroup.SamAccountName -ne $UserSAM){
-                        # Ajouter le le nom du délégué en tant que manager pour les autres membres de son groupe
+                        # Ajouter le le nom du dï¿½lï¿½guï¿½ en tant que manager pour les autres membres de son groupe
                         Set-ADUser -Identity $MemberGroup -Manager $UserSAM
                     }Else{
                         # Changer le champs Title actuellement Etudiant par Delegue
                         Set-ADUser -Identity $UserSam -Title "Delegue"
                     }
-                  
-                }
-
-            }
-            
-
-            if ($DelegueAD -ne $DelegueCSV ) {
-                try {
-                    Set-ADUser -Identity $UniqueId -Title $DelegueCSV
-                    Write-Success -Message "Modification du statut de l'utilisateur :" -Commentaire $UserDisplay
-                }catch {
-                    $_
-                    Write-Warning -Message "Modification du statut de l'utilisateur impossible:" -Commentaire $UserDisplay
                 }
             }
-
             if ($InfoADFirstname -ne $UserFirstname) {
                 try {
                     Set-ADUser -Identity $UniqueId -GivenName $UserFirstname
@@ -192,11 +174,11 @@ foreach ($User in $CSVdata) {
     "Delegue" = $UserDelegue
     }
 
-    #$expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Append -NoTypeInformation 
-    #$expusers | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Force -Append -NoTypeInformation
-    $expusers | ConvertTo-Csv -Delimiter ';' -NoTypeInformation | % {$_.Replace('"','')} | Out-File "C:\New-users.csv" -Append -NoNewline
-    #$expusers| Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -NoTypeInformation -UseCulture -NoQuoteChar
-    #$expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -UseCulture -Append -NoTypeInformation
+   #$expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Append -NoTypeInformation 
+   $expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Append -NoTypeInformation 
+    
+
+
 
 }
 
