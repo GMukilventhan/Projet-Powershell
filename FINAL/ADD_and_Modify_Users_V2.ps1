@@ -121,10 +121,22 @@ foreach ($User in $CSVdata) {
                 foreach ($MemberGroup in $AllMembersGroup) {
                     If($MemberGroup.SamAccountName -ne $UserSAM){
                         # Ajouter le le nom du d�l�gu� en tant que manager pour les autres membres de son groupe
-                        Set-ADUser -Identity $MemberGroup -Manager $UserSAM
+                        try { 
+                            Set-ADUser -Identity $MemberGroup -Manager $UserSAM
+                            write-success -Message "Modification du manager de l'utilisateur :" -Commentaire $MemberGroup
+                        }catch {
+                            
+                            Write-Error -Message "Modification du manager de l'utilisateur impossible:" -Commentaire $MemberGroup
+                        }
                     }Else{
                         # Changer le champs Title actuellement Etudiant par Delegue
-                        Set-ADUser -Identity $UserSam -Title "Delegue"
+                        try {
+                            Set-ADUser -Identity $UserSAM -Title "Delegue"
+                            Write-Success -Message "Modification du titre de l'utilisateur :$UserSAM" -Commentaire $UserDisplay
+                        }catch {
+                            Write-Error -Message "Modification du titre de l'utilisateur impossible:$UserSAM" -Commentaire $UserDisplay
+                        }
+                        
                     }
                 }
             }

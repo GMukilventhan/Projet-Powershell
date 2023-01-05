@@ -96,27 +96,16 @@ function New-OufromCsv {
 
 function test-userexists {
             param(
+                $Parameter,
                 $Identity
             )
-            $result = Get-ADUser -Filter {Name -eq $Identity}
+            $result = Get-ADUser -Filter {$Parameter -eq $Identity}
             if ($result) {
-            return $True 
-             } else {
-              return $False
-              }
-            
+                return $True 
+            }else{
+                return $False
+            }
         }
-
-
-     
-           
-
-
-
-
-
-
-
 
 #momo
 function add-Groups-distrib-securityFromOUs
