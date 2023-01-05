@@ -7,7 +7,7 @@ Import-Module $PSScriptRoot/Module.psm1
 $global:filelogs = "Logs/Modif.json"
 
 # Importe les donnees du fichier CSV
-$CSVpath = "CSV/user.csv"
+$CSVpath = "C:\Git\CSV\user.csv"
 $CSVdata = Import-CSV -Path $CSVpath -Delimiter ";" -Encoding Default
 
 # Parcourir chaque ligne du fichier CSV
@@ -15,9 +15,10 @@ foreach ($User in $CSVdata) {
     $UserSAM = $User.SAM
     $UserFirstname = $User.Firstname
     $UserLastname = $User.Lastname.ToUpper()
-    $UserDisplay = $UserFirstname + "_" + $UserLastname.ToUpper()
+    $UserDisplay = $UserFirstname + " " + $UserLastname.ToUpper()
     $UserFirstnameLastname = $UserFirstname.ToLower() + "." + $UserLastname.ToLower()
-    $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 10 | %{[char]$_})
+    $password = -join (65..90 + 97..122 + 48..57 + 33..47 | Get-Random -Count 12 | %{[char]$_})
+    $password = $password + "$"
     $UPN = $UserFirstnameLastname + "@biodevops.local"
     $UserEmail = $UserFirstnameLastname + "@biodevops.eu"
     $UserTitle = "Etudiant"
@@ -56,6 +57,7 @@ foreach ($User in $CSVdata) {
         $testuser = test-userexists -Identity $UserDisplay -Parameter "Name"
         $OriginalUserFirstnameLastname = $UserFirstnameLastname
         $OriginalUserDisplay = $UserDisplay
+        $UniqueId
   
         while ($testuser -eq $True) {
    
@@ -84,6 +86,7 @@ foreach ($User in $CSVdata) {
             -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) `
             -ChangePasswordAtLogon $True `
             -Enabled $UserActivation
+            $UniqueId
 
             Write-Success -Message "crÃƒÂ©ation de l'utilisateur :" -Commentaire $UserDisplay
             $users = @()
@@ -105,8 +108,11 @@ foreach ($User in $CSVdata) {
            Write-Warning -Message "error" -Commentaire "error"
         }
 
+        $UniqueId
+
     }else {
         $UniqueId = $UserSAM
+        $UniqueId
         if (test-userexists -Identity $UniqueId -Parameter "SamAccountName") {
             $InfoADFirstname = $user.givenName
             $InfoADLastname = $User.sn
@@ -143,6 +149,9 @@ foreach ($User in $CSVdata) {
             if ($InfoADFirstname -ne $UserFirstname) {
                 try {
                     Set-ADUser -Identity $UniqueId -GivenName $UserFirstname
+                    Set-ADUser -Identity $UniqueId -EmailAddress $UserEmail
+                    Set-ADUser -Identity $UniqueId -DisplayName $UserDisplay
+                    Set-ADUser -Identity $UniqueId -UserPrincipalName $UPN
                     Write-Success -Message "Modification du prÃƒÂ©nom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
                     $_
@@ -152,6 +161,10 @@ foreach ($User in $CSVdata) {
             if ($InfoADLastname -ne $UserLastname) {
                 try {
                     Set-ADUser -Identity $UniqueId -Surname $UserLastname
+                    Set-ADUser -Identity $UniqueId -EmailAddress $UserEmail
+                    Set-ADUser -Identity $UniqueId -DisplayName $UserDisplay
+                    Set-ADUser -Identity $UniqueId -UserPrincipalName $UPN
+                   
                     Write-Success -Message "Modification du nom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
                     $_
@@ -163,7 +176,6 @@ foreach ($User in $CSVdata) {
                     Set-ADUser -Identity $UniqueId -Enabled $UserActivation
                     Write-Success -Message "Modification de l'activation de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
-                    $_
                     Write-Warning -Message "Modification de l'activation de l'utilisateur impossible:" -Commentaire $UserDisplay
                 }
             }
@@ -171,6 +183,7 @@ foreach ($User in $CSVdata) {
             echo "error"
         }
     }
+    $UniqueId
     #export tous les champs generer dans un fichier csv
     $expusers = @()
     $expusers += New-Object -TypeName PSObject -Property @{ 
@@ -187,8 +200,9 @@ foreach ($User in $CSVdata) {
     }
 
    #$expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Append -NoTypeInformation 
-   $expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Append -NoTypeInformation 
-    
+   #$expusers.GetEnumerator() | Export-Csv -Path "C:\New-users.csv" -Delimiter ';' -Append -NoTypeInformation 
+    $nomcsv = "C:\New-users-" + (Get-Date).ToString("dd-MM-yyyy-HH-mm-ss") + ".csv"
+    $expusers | Export-Csv -Path $nomcsv -Delimiter ';' -Append -NoType
 
 
 
