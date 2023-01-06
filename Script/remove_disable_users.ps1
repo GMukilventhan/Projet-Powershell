@@ -1,8 +1,10 @@
 $ErrorActionPreference = "Stop"
-Import-Module ActiveDirectory
-Import-Module $PSScriptRoot/Module.psm1
 
-$global:filelogs = "Logs/remove.json"
+$folder = "C:\Script"
+Import-Module ActiveDirectory
+Import-Module $folder/Module.psm1
+$global:filelogs = $folder + "/Logs/" + "remove.json"
+
 
 $users = Get-ADUser -Filter *
 
@@ -11,17 +13,23 @@ foreach ($user in $users) {
         $disableDate = $user.AccountDisabledDate
         $timeSinceDisable = New-TimeSpan -Start $disableDate -End (Get-Date)
         if ($timeSinceDisable.Days -gt 30) {
-            Remove-ADUser -Identity $user
-            Write-Success -Message "l'utilisateur a été supprimé:" -Commentaire $user
+            try{
+                Remove-ADUser -Identity $user
+                Write-Success -Message "l'utilisateur a été supprimé:" -Commentaire $user
+            }catch{
+                Write-Error -Message "error l'utilisateur $user a ete supprime:" -Commentaire $user        
+            }
         }
     }else{
         $inactiveDays = 60
         $time = (Get-Date).Adddays(-($inactiveDays))
         if ($user.LastLogonTimeStamp -lt $time){
-            Disable-ADAccount -Identity $user
+            try{
+                Disable-ADAccount -Identity $user
+                Write-Success -Message "l'utilisateur $user a ete desactive" -Commentaire $user
+            }catch{
+               Write-Error -Message "impossible de desactive $user " -Commentaire $user     
+            }
         }
     }
 }
-
-
-
