@@ -22,31 +22,31 @@ Foreach($OU in $CSVdata){
     $GroupPath = "OU=$OUname" + "," + $OUpath
     try{
         New-ADOrganizationalUnit -Name $OUname -Path $OUpath -ProtectedFromAccidentalDeletion $False
-        Write-Success -Message "CrÃ©ation de l'unitÃ© d'organisation : $OUname" -Commentaire " -Name $OUname -Path $OUpath -ProtectedFromAccidentalDeletion $False"
+        Write-Success -Message "Création de l'unité d'organisation : $OUname" -Commentaire " -Name $OUname -Path $OUpath -ProtectedFromAccidentalDeletion $False"
     }catch{
-        Write-Error -Message "CrÃ©ation de l'unitÃ© d'organisation error: $OUname" -Commentaire " -Name $OUname -Path $OUpath -ProtectedFromAccidentalDeletion $False"
+        Write-Error -Message "ERREUR lors de la création de l'unité d'organisation : $OUname" -Commentaire " -Name $OUname -Path $OUpath -ProtectedFromAccidentalDeletion $False"
     }
 
     If(($OUsecurityGroup -eq "true") -and ($OUdistributionGroup -eq "true"))
     { 
         try{
             New-ADGroup -Name $SecurityGroupName -Path $GroupPath -GroupScope Global -GroupCategory Security
-            Write-Success -Message "CrÃ©ation du groupe de sÃ©curitÃ© Â« $SecurityGroupName Â» pour la promotion Â« $OUname Â»" -Commentaire "-Name $SecurityGroupName -Path $GroupPath -GroupScope Global -GroupCategory Security"
+            Write-Success -Message "Création du groupe de sécurité « $SecurityGroupName » pour la promotion « $OUname »" -Commentaire "-Name $SecurityGroupName -Path $GroupPath -GroupScope Global -GroupCategory Security"
         }catch{
-            Write-Error -Message "CrÃ©ation du groupe de sÃ©curitÃ© Â« error $SecurityGroupName Â» pour la promotion Â« $OUname Â»" -Commentaire "-Name $SecurityGroupName -Path $GroupPath -GroupScope Global -GroupCategory Security"
+            Write-Error -Message "ERREUR lors de la création du groupe de sécurité « $SecurityGroupName » pour la promotion « $OUname »" -Commentaire "-Name $SecurityGroupName -Path $GroupPath -GroupScope Global -GroupCategory Security"
         }  
         $GroupDistributionEmail = $OUname.Split('_')[1] + "." + $OUname.Split('_')[0] + "@biodevops.eu"
         try{
             New-ADGroup -Name $DistributionGroupName -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}
-            Write-Success -Message "CrÃ©ation du groupe de distribution Â« $DistributionGroupName Â» pour la promotion Â« $OUname Â» associÃ© Ã  l'e-mail Â« $GroupDistributionEmail Â»" -Commentaire "-Name $DistributionGroupName -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}"
+            Write-Success -Message "Création du groupe de distribution « $DistributionGroupName » pour la promotion « $OUname » associé à l'e-mail « $GroupDistributionEmail »" -Commentaire "-Name $DistributionGroupName -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}"
         }catch{
-            Write-Error -Message "CrÃ©ation du groupe de distribution Â« $DistributionGroupName Â» pour la promotion Â« $OUname Â» associÃ© Ã  l'e-mail Â« $GroupDistributionEmail Â»" -Commentaire "-Name $DistributionGroupName -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}"
+            Write-Error -Message "ERREUR lors de la création du groupe de distribution « $DistributionGroupName » pour la promotion « $OUname » associé Ã  l'e-mail « $GroupDistributionEmail »" -Commentaire "-Name $DistributionGroupName -Path $GroupPath -GroupScope Global -GroupCategory Distribution -OtherAttributes @{'mail'= $GroupDistributionEmail}"
         }
         try{
             Add-ADGroupMember -Identity $DistributionGroupName -Members $SecurityGroupName
-            Write-Success -Message "Le groupe de sÃ©curitÃ© Â« $SecurityGroupName Â» devient membre du groupe de distribution Â« $DistributionGroupName Â»" -Commentaire "-Identity $DistributionGroupName -Members $SecurityGroupName"
+            Write-Success -Message "Le groupe de sécurité « $SecurityGroupName » devient membre du groupe de distribution « $DistributionGroupName »" -Commentaire "-Identity $DistributionGroupName -Members $SecurityGroupName"
         }catch{
-            Write-Error -Message "Le groupe de sÃ©curitÃ© Â« $SecurityGroupName Â»  error devient membre du groupe de distribution Â« $DistributionGroupName Â»" -Commentaire "-Identity $DistributionGroupName -Members $SecurityGroupName"
+            Write-Error -Message "ERREUR lors de l'ajout du groupe de sécurité « $SecurityGroupName » au groupe de distribution « $DistributionGroupName »" -Commentaire "-Identity $DistributionGroupName -Members $SecurityGroupName"
         }
     }
 

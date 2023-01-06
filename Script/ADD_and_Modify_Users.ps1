@@ -87,7 +87,7 @@ foreach ($User in $CSVdata) {
             -ChangePasswordAtLogon $True `
             -Enabled $UserActivation
 
-            Write-Success -Message "crÃƒÆ’Ã‚Â©ation de l'utilisateur :" -Commentaire $UserDisplay
+            Write-Success -Message "Création de l'utilisateur :" -Commentaire $UserDisplay
             $users = @()
             $users += New-Object -TypeName PSObject -Property @{
             "Identifiant" = $UPN
@@ -96,7 +96,7 @@ foreach ($User in $CSVdata) {
             $passwordfile = $folder + "/Export/" + "password.csv"
             $users | Export-Csv -Path $passwordfile -Append -NoType
         }catch {
-            Write-Warning -Message "crÃƒÆ’Ã‚Â©ation de l'utilisateur impossible:" -Commentaire $UserDisplay
+            Write-Warning -Message "ERREUR lors de la création de l'utilisateur :" -Commentaire $UserDisplay
         }
 
 
@@ -117,18 +117,18 @@ foreach ($User in $CSVdata) {
             
             if($UserDelegue -eq $True){
                 $DelegueMemberOf = Get-ADPrincipalGroupMembership $UniqueId | Where-Object {$_.name -like "Grp_Securite_*"}
-                # Rï¿½cupï¿½rer le nom de l'utilisateur et son SAMaccountName
+                # Récupérer le nom de l'utilisateur et son SAMaccountName
                 $AllMembersGroup = Get-ADGroupMember -Identity $DelegueMemberOf.Name
  
                 foreach ($MemberGroup in $AllMembersGroup) {
                     If($MemberGroup.SamAccountName -ne $UserSAM){
-                        # Ajouter le le nom du dï¿½lï¿½guï¿½ en tant que manager pour les autres membres de son groupe
+                        # Ajouter le le nom du délégué en tant que manager pour les autres membres de son groupe
                         try { 
                             Set-ADUser -Identity $MemberGroup -Manager $UserSAM
                             write-success -Message "Modification du manager de l'utilisateur :" -Commentaire $MemberGroup
                         }catch {
                             
-                            Write-Error -Message "Modification du manager de l'utilisateur impossible:" -Commentaire $MemberGroup
+                            Write-Error -Message "ERREUR lors de la modification du manager de l'utilisateur :" -Commentaire $MemberGroup
                         }
                     }Else{
                         # Changer le champs Title actuellement Etudiant par Delegue
@@ -136,7 +136,7 @@ foreach ($User in $CSVdata) {
                             Set-ADUser -Identity $UserSAM -Title "Delegue"
                             Write-Success -Message "Modification du titre de l'utilisateur :$UserSAM" -Commentaire $UserDisplay
                         }catch {
-                            Write-Error -Message "Modification du titre de l'utilisateur impossible:$UserSAM" -Commentaire $UserDisplay
+                            Write-Error -Message "ERREUR lors de la modification du titre de l'utilisateur : $UserSAM" -Commentaire $UserDisplay
                         }
                         
                     }
@@ -148,10 +148,10 @@ foreach ($User in $CSVdata) {
                     Set-ADUser -Identity $UniqueId -EmailAddress $UserEmail
                     Set-ADUser -Identity $UniqueId -DisplayName $UserDisplay
                     Set-ADUser -Identity $UniqueId -UserPrincipalName $UPN
-                    Write-Success -Message "Modification du prÃƒÆ’Ã‚Â©nom de l'utilisateur :" -Commentaire $UserDisplay
+                    Write-Success -Message "Modification du prénom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
                     $_
-                    Write-Warning -Message "Modification du prÃƒÆ’Ã‚Â©nom de l'utilisateur impossible:" -Commentaire $UserDisplay
+                    Write-Warning -Message "ERREUR lors de la modification du prénom de l'utilisateur :" -Commentaire $UserDisplay
                 }
             }
             if ($InfoADLastname -ne $UserLastname) {
@@ -163,22 +163,22 @@ foreach ($User in $CSVdata) {
                    
                     Write-Success -Message "Modification du nom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
-                    Write-Warning -Message "Modification du nom de l'utilisateur impossible:" -Commentaire $UserDisplay
+                    Write-Warning -Message "ERREUR lors de la modification du nom de l'utilisateur :" -Commentaire $UserDisplay
                 }
             }
             if ($InfoADUserActivation -ne $UserActivation) {
                 try {
                     Set-ADUser -Identity $UniqueId -Enabled $UserActivation
-                    Write-Success -Message "Modification de l'activation de l'utilisateur :" -Commentaire $UserDisplay
+                    Write-Success -Message "Modification du statut d'activation de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
-                    Write-Warning -Message "Modification de l'activation de l'utilisateur impossible:" -Commentaire $UserDisplay
+                    Write-Warning -Message "ERREUR lors de la modification du statut d'activation de l'utilisateur :" -Commentaire $UserDisplay
                 }
             }
         }else{
             echo "error"
         }
     }
-    #export tous les champs generer dans un fichier csv
+    # Export des variables dans les champs d'un fichier CSV
     $expusers = @()
     $expusers += New-Object -TypeName PSObject -Property @{ 
         "SAM" = $UniqueId   
