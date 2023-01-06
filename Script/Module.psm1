@@ -102,14 +102,11 @@ function test-userexists {
             try{
                 $result = Get-ADUser -Filter {$Parameter -eq $Identity}
                 if ($result) {
-                echo "True"
                     return $True 
                 }else{
-                echo "False"
                     return $False
                 }
             }catch{
-                echo "catch"
                 return $False
                 
             }   
