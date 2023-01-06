@@ -117,12 +117,12 @@ foreach ($User in $CSVdata) {
             
             if($UserDelegue -eq $True){
                 $DelegueMemberOf = Get-ADPrincipalGroupMembership $UniqueId | Where-Object {$_.name -like "Grp_Securite_*"}
-                # R�cup�rer le nom de l'utilisateur et son SAMaccountName
+                # Recuperer le nom de l'utilisateur et son SAMaccountName
                 $AllMembersGroup = Get-ADGroupMember -Identity $DelegueMemberOf.Name
 
                 foreach ($MemberGroup in $AllMembersGroup) {
                     If($MemberGroup.SamAccountName -ne $UserSAM){
-                        # Ajouter le le nom du d�l�gu� en tant que manager pour les autres membres de son groupe
+                        # Ajouter le le nom du delegue en tant que manager pour les autres membres de son groupe
                         try { 
                             Set-ADUser -Identity $MemberGroup -Manager $UserSAM
                             write-success -Message "Modification du manager de l'utilisateur :" -Commentaire $MemberGroup
@@ -148,6 +148,7 @@ foreach ($User in $CSVdata) {
                     Set-ADUser -Identity $UniqueId -EmailAddress $UserEmail
                     Set-ADUser -Identity $UniqueId -DisplayName $UserDisplay
                     Set-ADUser -Identity $UniqueId -UserPrincipalName $UPN
+                    Get-ADUser -Identity $UniqueId | Rename-ADObject -NewName $UserDisplay
                     Write-Success -Message "Modification du pr�nom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
                     $_
@@ -160,7 +161,7 @@ foreach ($User in $CSVdata) {
                     Set-ADUser -Identity $UniqueId -EmailAddress $UserEmail
                     Set-ADUser -Identity $UniqueId -DisplayName $UserDisplay
                     Set-ADUser -Identity $UniqueId -UserPrincipalName $UPN
-
+                    Get-ADUser -Identity $UniqueId | Rename-ADObject -NewName $UserDisplay
                     Write-Success -Message "Modification du nom de l'utilisateur :" -Commentaire $UserDisplay
                 }catch {
                     Write-Warning -Message "ERREUR lors de la modification du nom de l'utilisateur :" -Commentaire $UserDisplay
