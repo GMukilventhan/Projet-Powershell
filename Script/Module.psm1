@@ -112,7 +112,7 @@ function test-userexists {
             }   
         }
 
-#momo
+<#
 function add-Groups-distrib-securityFromOUs
 {
     param(
@@ -139,7 +139,7 @@ function add-Groups-distrib-securityFromOUs
             New-ADGroup -Name $groupName -Path $ou.DistinguishedName -GroupCategory "Distribution" -GroupScope $GroupScope
         }
     }
-    <#
+   
     foreach ($group in $groups){
         foreach ($user in $users){
             if ($user.Department -eq $group.Name){
@@ -147,15 +147,8 @@ function add-Groups-distrib-securityFromOUs
             }
         }
     }
-    #>
+
 }
-
-
-
-
-
-
-
 function set-newdelege {
     param (
         $Name_user_master
@@ -173,3 +166,4 @@ function set-newdelege {
         }
     }
 }
+    #>
